@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Camera,
-  CheckCircle2,
   Download,
   Eye,
   FolderInput,
@@ -13,7 +12,6 @@ import {
   Maximize2,
   Search,
   ShieldCheck,
-  Sparkles,
   Star,
   Tags,
   Trash2,
@@ -693,6 +691,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isResultModalOpen, setIsResultModalOpen] = useState(false)
   const [isSingleMode, setIsSingleMode] = useState(false)
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [undoSnapshot, setUndoSnapshot] = useState<{
     photos: PhotoItem[]
     personFolders: PersonFolder[]
@@ -2294,6 +2293,17 @@ function App() {
           )}
         </section>
 
+        <button
+          type="button"
+          className="advanced-toggle"
+          onClick={() => setIsAdvancedOpen((value) => !value)}
+          aria-expanded={isAdvancedOpen}
+        >
+          <span>⚙ 고급 기능</span>
+          <small>{isAdvancedOpen ? '접기' : '펼치기'}</small>
+        </button>
+        {isAdvancedOpen && (
+          <>
         <section className="panel compact-panel">
           <h2>사람별 모음 (인물 폴더)</h2>
           <label>
@@ -2417,10 +2427,12 @@ function App() {
             </>
           )}
         </section>
+          </>
+        )}
 
         <section className="panel compact-panel">
           <h2>2. 선택한 사진 분류하기</h2>
-          <p className="panel-hint">여러 사진을 클릭해서 선택한 뒤 아래 버튼을 누르면 한 번에 분류됩니다. 한 장씩 빠르게 처리하려면 위쪽 「한 장씩 빠르게 분류」 버튼을 사용하세요.</p>
+          <p className="panel-hint">여러 사진을 클릭해서 선택한 뒤 아래 버튼을 누르면 한 번에 분류됩니다. 한 장씩 처리하려면 위쪽 「한 장씩 분류」 버튼을 사용하세요.</p>
           <div className="status-actions">
             {STATUS_OPTIONS.map((option) => {
               const Icon = option.icon
@@ -2558,46 +2570,29 @@ function App() {
           ))}
         </ol>
 
-        <section className="metrics">
-          <article title="현재 화면에 들어와 있는 전체 사진 수">
-            <Camera size={18} />
-            <strong>{photos.length}</strong>
-            <span>전체 사진</span>
-          </article>
-          <article className="metric-progress" title="학생 태그나 인물 폴더가 한 명 이상 붙은 사진 비율">
-            <CheckCircle2 size={18} />
-            <strong>
-              {stats.tagged}
-              <small>/ {photos.length}</small>
-            </strong>
-            <span>태그 완료</span>
-            <div className="metric-progress-bar" aria-hidden="true">
+        {photos.length > 0 && (
+          <section className="metrics-simple">
+            <div className="metrics-simple-line">
+              <Camera size={18} />
+              <strong>{photos.length}장</strong>
+              <span className="metrics-simple-sep">·</span>
+              <span>분류 완료</span>
+              <strong className="metrics-simple-progress">{sortedCount}</strong>
+              <span>/ {photos.length}장</span>
+              {(stats.duplicates + stats.blurry + reviewIssues.length) > 0 && (
+                <span className="metrics-simple-warn" title={`중복 ${stats.duplicates} · 흐림 ${stats.blurry} · 자동 검토 ${reviewIssues.length}`}>
+                  · 한 번 더 볼 사진 {stats.duplicates + stats.blurry + reviewIssues.length}
+                </span>
+              )}
+            </div>
+            <div className="metrics-simple-bar" aria-hidden="true">
               <div
-                className="metric-progress-bar-fill"
-                style={{ width: `${photos.length ? Math.round((stats.tagged / photos.length) * 100) : 0}%` }}
+                className="metrics-simple-bar-fill"
+                style={{ width: `${photos.length ? Math.round((sortedCount / photos.length) * 100) : 0}%` }}
               />
             </div>
-          </article>
-          <article title="대표 사진으로 선별한 수">
-            <Star size={18} />
-            <strong>{stats.featured}</strong>
-            <span>대표 사진</span>
-          </article>
-          <article title="이름이 한 명 이상 배정된 인물 폴더 사진 수">
-            <Users size={18} />
-            <strong>{stats.peopleAssigned}</strong>
-            <span>인물 배정</span>
-          </article>
-          <article
-            className={reviewIssues.length || stats.duplicates || stats.blurry ? 'metric-warn' : ''}
-            title={`검토 후보 — 중복 ${stats.duplicates} · 흐림 ${stats.blurry} · 자동 검토 항목 ${reviewIssues.length}`}
-          >
-            <Sparkles size={18} />
-            <strong>{stats.duplicates + stats.blurry + reviewIssues.length}</strong>
-            <span>검토 후보</span>
-            <small className="metric-sub">중복 {stats.duplicates} · 흐림 {stats.blurry}</small>
-          </article>
-        </section>
+          </section>
+        )}
 
         {!photos.length ? (
           <section
