@@ -316,6 +316,12 @@ const STATUS_FOLDER_LABELS: Record<PhotoStatus, string> = {
   public_candidate: '공개후보',
   exclude: '제외검토',
 }
+const STATUS_KEYS: Record<PhotoStatus, string> = {
+  keep: '1',
+  featured: '2',
+  public_candidate: '3',
+  exclude: '4',
+}
 const STATUS_SHORTCUTS: Record<string, PhotoStatus> = {
   '1': 'keep',
   '2': 'featured',
@@ -544,6 +550,9 @@ function App() {
   const [isZipping, setIsZipping] = useState(false)
   const [isFolderSaving, setIsFolderSaving] = useState(false)
   const [isDriveSaving, setIsDriveSaving] = useState(false)
+  const [isPlanMenuOpen, setIsPlanMenuOpen] = useState(false)
+  const planMenuRef = useRef<HTMLDivElement | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isFaceScanning, setIsFaceScanning] = useState(false)
   const [faceScanMessage, setFaceScanMessage] = useState('')
   const [projectMessage, setProjectMessage] = useState('')
@@ -1652,6 +1661,17 @@ function App() {
   }
 
   useEffect(() => {
+    if (!isPlanMenuOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (planMenuRef.current && !planMenuRef.current.contains(event.target as Node)) {
+        setIsPlanMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isPlanMenuOpen])
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null
       const isTyping =
@@ -1703,7 +1723,25 @@ function App() {
   ])
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      <button
+        type="button"
+        className="sidebar-toggle"
+        onClick={() => setIsSidebarOpen((value) => !value)}
+        aria-expanded={isSidebarOpen}
+        aria-label={isSidebarOpen ? '메뉴 닫기' : '메뉴 열기'}
+      >
+        <span aria-hidden="true">{isSidebarOpen ? '✕' : '☰'}</span>
+        <span className="sr-only">메뉴</span>
+      </button>
+      {isSidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="메뉴 닫기"
+        />
+      )}
       <aside className="sidebar">
         <div className="brand">
           <img src="/eum-logo.png" alt="" />
@@ -1760,7 +1798,12 @@ function App() {
             accept=".csv,text/csv"
             onChange={(event) => void importRoster(event.target.files)}
           />
-          <button className="secondary-action subtle-action" type="button" onClick={() => rosterInputRef.current?.click()}>
+          <button
+            className="secondary-action subtle-action"
+            type="button"
+            onClick={() => rosterInputRef.current?.click()}
+            title="이름 컬럼이 있는 CSV를 불러오면 이름 칩으로 빠르게 태그할 수 있어요. 「공개동의/초상권/consent」 컬럼이 있으면 동의 상태도 함께 표시됩니다."
+          >
             <Upload size={16} />
             학생 명단 CSV
           </button>
@@ -1849,7 +1892,12 @@ function App() {
                 </button>
               </article>
             ))}
-            {!personFolders.length && <p>대표사진을 확대해서 확인한 뒤 인물 폴더를 만들 수 있습니다.</p>}
+            {!personFolders.length && (
+              <p>
+                인물 폴더는 같은 사람의 사진을 한곳에 모으는 자리입니다. 사진을 확대해서 얼굴 박스를 클릭하고 이름을 입력하면 그
+                사진이 대표 사진으로 등록됩니다.
+              </p>
+            )}
           </div>
         </section>
 
@@ -1864,12 +1912,18 @@ function App() {
 
         <section className="panel compact-panel">
           <h2>누적 통계</h2>
-          <button className="secondary-action" type="button" onClick={archiveCurrentPlan} disabled={!photos.length}>
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={archiveCurrentPlan}
+            disabled={!photos.length}
+            title="이 컴퓨터 브라우저에만 저장됩니다. 학생별 사진 수가 행사를 거듭할수록 누적되어 등장 균형을 비교할 수 있어요."
+          >
             <Archive size={16} />
             이 행사 누적에 추가
           </button>
           {cumulativeStats.eventCount === 0 ? (
-            <p className="scan-message">행사 정리가 끝나면 누적에 추가해 학생별 사진 수를 비교할 수 있습니다.</p>
+            <p className="scan-message">정리가 끝난 행사를 추가하면 다음 행사에서 학생별 누적 사진 수를 비교할 수 있어요.</p>
           ) : (
             <>
               <p className="cumulative-summary">
@@ -1928,10 +1982,12 @@ function App() {
         </section>
 
         <section className="panel compact-panel">
-          <h2>선별 상태</h2>
+          <h2>선택 사진 상태 변경</h2>
+          <p className="panel-hint">사진을 먼저 선택한 뒤 상태를 일괄 적용합니다. 키보드 단축키 1·2·3·4도 같은 동작.</p>
           <div className="status-actions">
             {STATUS_OPTIONS.map((option) => {
               const Icon = option.icon
+              const shortcut = STATUS_KEYS[option.value]
 
               return (
                 <button
@@ -1939,9 +1995,11 @@ function App() {
                   type="button"
                   onClick={() => setStatusForPhotos(selectedIds, option.value)}
                   disabled={!selectedCount}
+                  title={`${option.label} (단축키 ${shortcut})`}
                 >
                   <Icon size={15} />
                   {option.label}
+                  <kbd className="shortcut-badge">{shortcut}</kbd>
                 </button>
               )
             })}
@@ -1970,37 +2028,114 @@ function App() {
               hidden
               onChange={(event) => void importProject(event.target.files)}
             />
-            <button type="button" onClick={() => projectInputRef.current?.click()}>
-              <Upload size={16} />
-              작업 불러오기
-            </button>
-            <button type="button" onClick={exportProject} disabled={!photos.length}>
-              <Download size={16} />
-              작업 저장
-            </button>
-            <button type="button" onClick={() => void exportToLocalFolder()} disabled={!photos.length || isFolderSaving}>
-              <FolderInput size={16} />
-              {isFolderSaving ? '폴더 저장 중' : '로컬 폴더 저장'}
-            </button>
-            <button type="button" onClick={() => void exportOrganizedZip()} disabled={!photos.length || isZipping}>
-              <Download size={16} />
-              {isZipping ? 'ZIP 생성 중' : '정리본 ZIP'}
-            </button>
-            {GOOGLE_CLIENT_ID && (
-              <button type="button" onClick={() => void exportToGoogleDrive()} disabled={!photos.length || isDriveSaving}>
+            <div className="top-actions-group" aria-label="작업 백업">
+              <button
+                type="button"
+                onClick={() => projectInputRef.current?.click()}
+                title="이전에 저장한 작업 JSON을 불러와 태그·상태·인물 폴더를 복원합니다."
+              >
                 <Upload size={16} />
-                {isDriveSaving ? 'Drive 업로드 중' : 'Google Drive'}
+                작업 불러오기
               </button>
-            )}
-            <button type="button" onClick={exportPlan} disabled={!photos.length}>
-              <Download size={16} />
-              정리안 CSV
-            </button>
-            <button type="button" onClick={exportPlanJson} disabled={!photos.length}>
-              <Download size={16} />
-              정리안 JSON
-            </button>
-            <button type="button" onClick={clearAll} disabled={!photos.length}>
+              <button
+                type="button"
+                onClick={exportProject}
+                disabled={!photos.length}
+                title="현재 화면 상태(태그·상태·얼굴 박스·인물 폴더)를 JSON으로 저장합니다. 사진 원본은 포함하지 않습니다."
+              >
+                <Download size={16} />
+                작업 저장
+              </button>
+            </div>
+            <span className="top-actions-divider" aria-hidden="true" />
+            <div className="top-actions-group" aria-label="사진 내보내기">
+              <button
+                type="button"
+                onClick={() => void exportToLocalFolder()}
+                disabled={!photos.length || isFolderSaving}
+                title="Chrome/Edge에서 선택한 폴더에 행사/상태/인물별로 사진과 정리안을 직접 저장합니다."
+              >
+                <FolderInput size={16} />
+                {isFolderSaving ? '폴더 저장 중' : '로컬 폴더 저장'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void exportOrganizedZip()}
+                disabled={!photos.length || isZipping}
+                title="모든 사진을 행사/상태/인물 폴더 구조로 묶은 ZIP을 다운로드합니다. 어떤 브라우저든 사용 가능."
+              >
+                <Download size={16} />
+                {isZipping ? 'ZIP 생성 중' : '정리본 ZIP'}
+              </button>
+              {GOOGLE_CLIENT_ID && (
+                <button
+                  type="button"
+                  onClick={() => void exportToGoogleDrive()}
+                  disabled={!photos.length || isDriveSaving}
+                  title="구글 드라이브에 행사 폴더를 만들고 사진과 정리안을 업로드합니다."
+                >
+                  <Upload size={16} />
+                  {isDriveSaving ? 'Drive 업로드 중' : 'Google Drive'}
+                </button>
+              )}
+            </div>
+            <span className="top-actions-divider" aria-hidden="true" />
+            <div className="top-actions-group dropdown-host" ref={planMenuRef} aria-label="정리표만 내보내기">
+              <button
+                type="button"
+                className={isPlanMenuOpen ? 'dropdown-trigger open' : 'dropdown-trigger'}
+                onClick={() => setIsPlanMenuOpen((value) => !value)}
+                disabled={!photos.length}
+                aria-haspopup="menu"
+                aria-expanded={isPlanMenuOpen}
+                title="사진은 빼고 정리안 파일만 받습니다. 이음 스쿨이나 보고용으로 활용."
+              >
+                <Download size={16} />
+                정리표 ▾
+              </button>
+              {isPlanMenuOpen && (
+                <div className="dropdown-popover" role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      exportPlan()
+                      setIsPlanMenuOpen(false)
+                    }}
+                    title="엑셀이나 표 도구로 바로 열 수 있는 표 형식."
+                  >
+                    <Download size={14} />
+                    <span>
+                      <strong>정리안 CSV</strong>
+                      <small>엑셀에서 바로 열기</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      exportPlanJson()
+                      setIsPlanMenuOpen(false)
+                    }}
+                    title="이음 스쿨 등 다른 도구로 가져갈 때 쓰는 구조화 데이터."
+                  >
+                    <Download size={14} />
+                    <span>
+                      <strong>정리안 JSON</strong>
+                      <small>이음 스쿨·도구 연계용</small>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <span className="top-actions-divider" aria-hidden="true" />
+            <button
+              type="button"
+              className="danger-action"
+              onClick={clearAll}
+              disabled={!photos.length}
+              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다. 저장하지 않은 작업은 「작업 저장」으로 백업한 뒤 사용하세요."
+            >
               <Trash2 size={16} />
               비우기
             </button>
@@ -2014,50 +2149,43 @@ function App() {
         )}
 
         <section className="metrics">
-          <article>
+          <article title="현재 화면에 들어와 있는 전체 사진 수">
             <Camera size={18} />
             <strong>{photos.length}</strong>
-            <span>사진</span>
+            <span>전체 사진</span>
           </article>
-          <article>
-            <FolderInput size={18} />
-            <strong>{stats.dates}</strong>
-            <span>날짜 그룹</span>
-          </article>
-          <article>
-            <Search size={18} />
-            <strong>{stats.duplicates}</strong>
-            <span>중복 후보</span>
-          </article>
-          <article>
-            <Sparkles size={18} />
-            <strong>{stats.blurry}</strong>
-            <span>흐림 후보</span>
-          </article>
-          <article>
+          <article className="metric-progress" title="학생 태그나 인물 폴더가 한 명 이상 붙은 사진 비율">
             <CheckCircle2 size={18} />
-            <strong>{stats.tagged}</strong>
+            <strong>
+              {stats.tagged}
+              <small>/ {photos.length}</small>
+            </strong>
             <span>태그 완료</span>
+            <div className="metric-progress-bar" aria-hidden="true">
+              <div
+                className="metric-progress-bar-fill"
+                style={{ width: `${photos.length ? Math.round((stats.tagged / photos.length) * 100) : 0}%` }}
+              />
+            </div>
           </article>
-          <article>
+          <article title="대표 사진으로 선별한 수">
             <Star size={18} />
             <strong>{stats.featured}</strong>
             <span>대표 사진</span>
           </article>
-          <article>
-            <XCircle size={18} />
-            <strong>{stats.excluded}</strong>
-            <span>제외</span>
-          </article>
-          <article>
+          <article title="이름이 한 명 이상 배정된 인물 폴더 사진 수">
             <Users size={18} />
             <strong>{stats.peopleAssigned}</strong>
             <span>인물 배정</span>
           </article>
-          <article>
-            <Search size={18} />
-            <strong>{stats.facePhotos}</strong>
-            <span>얼굴 후보</span>
+          <article
+            className={reviewIssues.length || stats.duplicates || stats.blurry ? 'metric-warn' : ''}
+            title={`검토 후보 — 중복 ${stats.duplicates} · 흐림 ${stats.blurry} · 자동 검토 항목 ${reviewIssues.length}`}
+          >
+            <Sparkles size={18} />
+            <strong>{stats.duplicates + stats.blurry + reviewIssues.length}</strong>
+            <span>검토 후보</span>
+            <small className="metric-sub">중복 {stats.duplicates} · 흐림 {stats.blurry}</small>
           </article>
         </section>
 
@@ -2155,6 +2283,9 @@ function App() {
                   필터 해제
                 </button>
                 <span>{visibleSelectedCount}장 선택됨</span>
+                <span className="filter-hint" title="←→ 사진 이동 · Space 선택 · 1 보관 · 2 대표 · 3 공개후보 · 4 제외">
+                  단축키: ←→ Space 1 2 3 4
+                </span>
               </div>
               <div className="photo-grid">
                 {visiblePhotos.map((photo) => {
@@ -2179,9 +2310,10 @@ function App() {
                           setActivePhotoId(photo.id)
                           toggleSelected(photo.id)
                         }}
+                        title={selected ? '클릭하면 선택 해제됩니다.' : '여러 장을 선택해 일괄 태그·상태 변경할 수 있습니다.'}
                       >
                         <img src={photo.url} alt={photo.name} />
-                        <span className="photo-check">{selected ? '선택됨' : '선택'}</span>
+                        <span className="photo-check">{selected ? '✓ 선택됨' : '선택'}</span>
                       </button>
                       <button className="photo-zoom" type="button" onClick={() => openViewer(photo.id)}>
                         <Maximize2 size={14} />
@@ -2225,6 +2357,7 @@ function App() {
                       <div className="quick-status" aria-label={`${photo.name} 선별 상태`}>
                         {STATUS_OPTIONS.map((option) => {
                           const Icon = option.icon
+                          const shortcut = STATUS_KEYS[option.value]
 
                           return (
                             <button
@@ -2232,10 +2365,11 @@ function App() {
                               type="button"
                               className={photo.status === option.value ? 'active' : ''}
                               onClick={() => setStatusForPhotos([photo.id], option.value)}
-                              title={option.label}
+                              title={`${option.label} (단축키 ${shortcut})`}
                             >
                               <Icon size={13} />
                               <span>{option.shortLabel}</span>
+                              <kbd className="shortcut-badge">{shortcut}</kbd>
                             </button>
                           )
                         })}
