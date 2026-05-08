@@ -2274,11 +2274,6 @@ function App() {
               행사명을 비워두면 새로 추가된 사진은 「주일학교」로 저장됩니다.
             </p>
           )}
-          <p className="panel-hint">
-            학생 이름은 두 가지 방법 중 편한 쪽으로. 명단을 불러오면 아래 이름 칩 클릭으로:
-            <br />· <strong>사진 선택 없이</strong> 누르면 그 이름으로 사진 필터링
-            <br />· <strong>사진 선택 후</strong> 누르면 그 이름을 일괄 태그
-          </p>
           <label>
             학생 이름 직접 입력
             <input
@@ -2368,27 +2363,8 @@ function App() {
           )}
         </section>
 
-        <button
-          type="button"
-          className="advanced-toggle"
-          onClick={() => setIsAdvancedOpen((value) => !value)}
-          aria-expanded={isAdvancedOpen}
-        >
-          <span>⚙ 고급 기능</span>
-          <small>{isAdvancedOpen ? '접기' : '펼치기'}</small>
-        </button>
-        {isAdvancedOpen && (
-          <>
         <section className="panel compact-panel">
-          <h2>사람별 모음 (인물 폴더)</h2>
-          <p className="panel-hint">
-            「학생 태그」보다 더 정밀한 분류 방식이에요. 같은 사람의 사진을 한곳에 모으고 대표 사진 1장을 지정합니다.
-            <br /><strong>사용법</strong>:
-            <br />1. 사진을 클릭해 활성화한 뒤 아래 「현재 사진을 대표로 등록」
-            <br />2. 또는 사진 「확대」 → 얼굴 박스 클릭 → 이름 입력
-            <br />3. 「후보 찾기」 누르면 비슷한 사진 자동 추천
-            <br /><small>※ 학생 태그만으로 충분하면 이 기능은 안 써도 됩니다.</small>
-          </p>
+          <h2>📁 사람별 폴더</h2>
           <label>
             인물 이름
             <input
@@ -2407,7 +2383,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => assignSelectedToPerson(folder.id)}
-                  title="선택된 사진을 이 인물 폴더에 배정합니다."
+                  title="선택된 사진을 이 폴더에 옮깁니다."
                 >
                   <Users size={14} />
                   <span>{folder.name}</span>
@@ -2416,10 +2392,10 @@ function App() {
                 <button
                   type="button"
                   onClick={() => findSimilarCandidates(folder.id)}
-                  title="대표 사진과 유사한 사진을 찾아 후보로 표시합니다."
+                  title="대표 사진과 비슷한 얼굴 자동 추천"
                 >
                   <WandSparkles size={14} />
-                  <span>후보 찾기</span>
+                  <span>비슷한 얼굴 찾기</span>
                   <strong>{folder.candidatePhotoIds.length}</strong>
                 </button>
                 <div className="person-folder-tools">
@@ -2430,7 +2406,7 @@ function App() {
                     type="button"
                     className="danger-link"
                     onClick={() => deletePersonFolder(folder.id)}
-                    title="이 인물 폴더만 삭제 (사진은 유지)"
+                    title="폴더 삭제 (사진 유지)"
                   >
                     삭제
                   </button>
@@ -2438,14 +2414,27 @@ function App() {
               </article>
             ))}
             {!personFolders.length && (
-              <p>
-                인물 폴더는 같은 사람의 사진을 한곳에 모으는 자리입니다. 사진을 확대해서 얼굴 박스를 클릭하고 이름을 입력하면 그
-                사진이 대표 사진으로 등록됩니다.
+              <p className="empty-hint">
+                ① 정리할 사람 사진 1장 클릭<br />
+                ② 위쪽에 이름 입력<br />
+                ③ 「현재 사진을 대표로 등록」<br />
+                ④ 「비슷한 얼굴 찾기」로 자동 추천
               </p>
             )}
           </div>
         </section>
 
+        <button
+          type="button"
+          className="advanced-toggle"
+          onClick={() => setIsAdvancedOpen((value) => !value)}
+          aria-expanded={isAdvancedOpen}
+        >
+          <span>⚙ 고급 기능</span>
+          <small>{isAdvancedOpen ? '접기' : '펼치기'}</small>
+        </button>
+        {isAdvancedOpen && (
+          <>
         <section className="panel compact-panel">
           <h2>얼굴 자동으로 찾기</h2>
           <button className="secondary-action" type="button" onClick={() => void scanPeoplePhotos()} disabled={!photos.length || isFaceScanning}>
@@ -2514,8 +2503,7 @@ function App() {
         )}
 
         <section className="panel compact-panel">
-          <h2>2. 선택한 사진 분류하기</h2>
-          <p className="panel-hint">여러 사진을 클릭해서 선택한 뒤 아래 버튼을 누르면 한 번에 분류됩니다. 한 장씩 처리하려면 위쪽 「한 장씩 분류」 버튼을 사용하세요.</p>
+          <h2>2. 선택한 사진 분류</h2>
           <div className="status-actions">
             {STATUS_OPTIONS.map((option) => {
               const Icon = option.icon
@@ -2888,6 +2876,12 @@ function App() {
                         activePhotoId === photo.id ? 'active' : ''
                       }`}
                       key={photo.id}
+                      draggable
+                      onDragStart={(event) => {
+                        const ids = selectedIds.includes(photo.id) && selectedIds.length > 0 ? selectedIds : [photo.id]
+                        event.dataTransfer.setData('application/x-eum-photo-ids', JSON.stringify(ids))
+                        event.dataTransfer.effectAllowed = 'move'
+                      }}
                     >
                       <button
                         className="photo-select"
@@ -3004,34 +2998,116 @@ function App() {
 
             <section className="plan-panel">
               <div className="section-heading">
-                <h2>정리안</h2>
-                <span>{groups.length}개 폴더</span>
+                <h2>📂 폴더 트리</h2>
+                <span>{groups.length + personFolders.length}개</span>
               </div>
-              <div className="person-summary">
-                <strong>인물 폴더</strong>
-                {personFolders.length ? (
-                  personFolders.map((folder) => (
-                    <button
-                      key={folder.id}
-                      type="button"
-                      onClick={() => {
-                        setSearchText(folder.name)
-                        setProjectMessage(`「${folder.name}」 모음 사진만 보기로 필터링했어요.`)
-                      }}
-                      title={`「${folder.name}」 모음 사진만 보기`}
-                    >
-                      {folder.name} {folder.photoIds.length}장
-                    </button>
-                  ))
-                ) : (
-                  <span>아직 없음</span>
-                )}
-              </div>
+              {(personFolders.length > 0 || photos.length > 0) && (
+                <div className="folder-tree">
+                  {personFolders.length > 0 && (
+                    <div className="folder-tree-section">
+                      <p className="folder-tree-label">👤 사람별 (사진을 끌어 놓으면 이동)</p>
+                      {personFolders.map((folder) => (
+                        <button
+                          key={folder.id}
+                          type="button"
+                          className="folder-tree-row droppable"
+                          onClick={() => {
+                            setSearchText(folder.name)
+                            setProjectMessage(`「${folder.name}」 사진만 보기`)
+                          }}
+                          onDragOver={(event) => {
+                            if (event.dataTransfer.types.includes('application/x-eum-photo-ids')) {
+                              event.preventDefault()
+                              event.dataTransfer.dropEffect = 'move'
+                              event.currentTarget.classList.add('drop-active')
+                            }
+                          }}
+                          onDragLeave={(event) => {
+                            event.currentTarget.classList.remove('drop-active')
+                          }}
+                          onDrop={(event) => {
+                            event.currentTarget.classList.remove('drop-active')
+                            const data = event.dataTransfer.getData('application/x-eum-photo-ids')
+                            if (!data) return
+                            event.preventDefault()
+                            const ids = JSON.parse(data) as string[]
+                            captureSnapshot(`${ids.length}장을 「${folder.name}」 폴더로 이동`)
+                            setPersonFolders((current) =>
+                              current.map((f) =>
+                                f.id === folder.id
+                                  ? { ...f, photoIds: [...new Set([...f.photoIds, ...ids])] }
+                                  : f,
+                              ),
+                            )
+                            setPhotos((current) =>
+                              current.map((photo) =>
+                                ids.includes(photo.id)
+                                  ? { ...photo, personFolderIds: [...new Set([...photo.personFolderIds, folder.id])] }
+                                  : photo,
+                              ),
+                            )
+                            setProjectMessage(`${ids.length}장을 「${folder.name}」 폴더로 옮겼어요.`)
+                          }}
+                          title={`${folder.name} 사진만 보기 · 드래그로 이동`}
+                        >
+                          <span className="folder-tree-icon">📁</span>
+                          <span className="folder-tree-name">{folder.name}</span>
+                          <span className="folder-tree-count">{folder.photoIds.length}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="folder-tree-section">
+                    <p className="folder-tree-label">🏷 분류별 (드래그로 분류 변경)</p>
+                    {STATUS_OPTIONS.map((option) => {
+                      const count = photos.filter((photo) => photo.status === option.value).length
+                      if (!count) return null
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className="folder-tree-row droppable"
+                          onClick={() => {
+                            setStatusFilter(option.value)
+                            setProjectMessage(`「${option.label}」 사진만 보기`)
+                          }}
+                          onDragOver={(event) => {
+                            if (event.dataTransfer.types.includes('application/x-eum-photo-ids')) {
+                              event.preventDefault()
+                              event.dataTransfer.dropEffect = 'move'
+                              event.currentTarget.classList.add('drop-active')
+                            }
+                          }}
+                          onDragLeave={(event) => {
+                            event.currentTarget.classList.remove('drop-active')
+                          }}
+                          onDrop={(event) => {
+                            event.currentTarget.classList.remove('drop-active')
+                            const data = event.dataTransfer.getData('application/x-eum-photo-ids')
+                            if (!data) return
+                            event.preventDefault()
+                            const ids = JSON.parse(data) as string[]
+                            captureSnapshot(`${ids.length}장을 「${option.label}」로 분류`)
+                            setStatusForPhotos(ids, option.value)
+                            setProjectMessage(`${ids.length}장을 「${option.label}」로 분류했어요.`)
+                          }}
+                          title={`${option.label} 사진만 보기 · 드래그로 분류`}
+                        >
+                          <span className="folder-tree-icon">
+                            {option.value === 'featured' ? '⭐' : option.value === 'public_candidate' ? '👁' : option.value === 'exclude' ? '🗑' : '📂'}
+                          </span>
+                          <span className="folder-tree-name">{option.label}</span>
+                          <span className="folder-tree-count">{count}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="review-panel">
-                <strong>검토 필요</strong>
+                <strong>⚠ 검토 필요</strong>
                 {reviewIssues.length ? (
                   <>
-                    <p className="panel-hint">항목을 누르면 해당 사진이 확대 보기로 열립니다.</p>
                     {reviewIssues.map((issue) => (
                       <button
                         key={issue.id}
