@@ -809,6 +809,8 @@ h1 {
 }
 
 .single-mode-toggle {
+  width: auto;
+  height: 36px;
   background: #fff;
   border: 1px solid #f9d56f;
   color: #92400e;
@@ -817,6 +819,8 @@ h1 {
   min-height: 36px;
   border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .single-mode-toggle.active {
@@ -1449,6 +1453,8 @@ h1 {
 .heading-actions {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
 }
 
