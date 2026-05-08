@@ -2242,20 +2242,6 @@ function App() {
                 <h1>교회학교 사진 정리 작업대</h1>
               </div>
             </div>
-            <div className="work-header">
-              <button className="primary-action" type="button" onClick={() => fileInputRef.current?.click()}>
-                <ImagePlus size={18} />
-                사진 추가
-              </button>
-              <label className="work-header-event">
-                <span>행사명</span>
-                <input
-                  value={eventInput}
-                  onChange={(event) => setEventInput(event.target.value)}
-                  placeholder="예: 봄 수련회"
-                />
-              </label>
-            </div>
           </div>
           <div className="top-actions">
             <input
@@ -2265,27 +2251,51 @@ function App() {
               hidden
               onChange={(event) => void importProject(event.target.files)}
             />
-            {undoSnapshot && (
-              <button
-                type="button"
-                className="undo-action"
-                onClick={performUndo}
-                title={`되돌리기: ${undoSnapshot.label}`}
-              >
-                <ArrowLeft size={16} />
-                방금 동작 취소
-              </button>
-            )}
+            <button
+              type="button"
+              className="primary-action"
+              onClick={() => fileInputRef.current?.click()}
+              title="사진 추가 (드래그앤드롭도 가능)"
+            >
+              <ImagePlus size={18} />
+              사진 추가
+            </button>
+            <button
+              type="button"
+              onClick={selectVisiblePhotos}
+              disabled={!visiblePhotos.length}
+              title="현재 화면에 보이는 사진 모두 선택"
+            >
+              전체 선택
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              disabled={!selectedIds.length}
+              title="선택된 사진 모두 해제"
+            >
+              선택 취소{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}
+            </button>
             <button
               type="button"
               className="danger-action"
               onClick={clearAll}
               disabled={!photos.length}
-              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다."
+              title="모든 사진과 정리한 내용을 지웁니다."
             >
               <Trash2 size={16} />
               비우기
             </button>
+            {undoSnapshot && (
+              <button
+                type="button"
+                className="undo-action-floating"
+                onClick={performUndo}
+                title={`되돌리기: ${undoSnapshot.label}`}
+              >
+                ↶ 방금 동작 취소
+              </button>
+            )}
           </div>
         </header>
 
@@ -2350,20 +2360,6 @@ function App() {
           </section>
         )}
 
-        <ol className="workflow-stepper" aria-label="작업 진행 상황">
-          {workflowSteps.map((step, index) => (
-            <li key={step.key} className={`workflow-step workflow-step-${step.state}`}>
-              <span className="workflow-step-num" aria-hidden="true">
-                {step.state === 'done' ? '✓' : index + 1}
-              </span>
-              <div>
-                <strong>{step.label}</strong>
-                <small>{step.hint}</small>
-              </div>
-            </li>
-          ))}
-        </ol>
-
         {photos.length > 0 && (
           <div
             className="metrics-thin-bar"
@@ -2423,97 +2419,16 @@ function App() {
         ) : (
           <div className="content-grid">
             <section className="photo-board">
-              <div className="section-heading">
-                <div>
-                  <h2>{isSingleMode ? '한 장씩 분류하기' : '사진 목록'}</h2>
-                  <p>
-                    {isSingleMode
-                      ? '큰 사진을 보면서 「쓸 사진 / 안 쓸 사진」 버튼만 누르세요. 자동으로 다음 사진으로 넘어가요.'
-                      : activePhoto
-                      ? `${activeIndex + 1}/${photos.length} · ${activePhoto.name}`
-                      : '사진을 클릭해 활성화하면 단축키로 빠르게 분류할 수 있어요.'}
-                  </p>
-                </div>
-                <div className="heading-actions">
-                  <button
-                    type="button"
-                    className={isSingleMode ? 'single-mode-toggle active' : 'single-mode-toggle'}
-                    onClick={() => setIsSingleMode((value) => !value)}
-                    title={isSingleMode ? '여러 사진을 한 번에 보는 화면으로 돌아갑니다.' : '한 장씩 큰 화면에서 빠르게 분류합니다.'}
-                  >
-                    {isSingleMode ? '목록 보기' : '한 장씩 분류'}
-                  </button>
-                  <button type="button" onClick={() => moveActivePhoto(-1)} disabled={activeIndex <= 0}>
-                    <ArrowLeft size={15} />
-                  </button>
-                  <span>
-                    {isAnalyzing
-                      ? analysisProgress.total > 0
-                        ? `분석 중 ${analysisProgress.done}/${analysisProgress.total}`
-                        : '분석 중...'
-                      : `${visiblePhotos.length}/${photos.length}장`}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => moveActivePhoto(1)}
-                    disabled={activeIndex < 0 || activeIndex >= photos.length - 1}
-                  >
-                    <ArrowRight size={15} />
-                  </button>
-                </div>
+              <div className="photo-board-toolbar">
+                <button
+                  type="button"
+                  className={isSingleMode ? 'single-mode-toggle active' : 'single-mode-toggle'}
+                  onClick={() => setIsSingleMode((value) => !value)}
+                  title={isSingleMode ? '목록 보기로 돌아가기' : '큰 사진으로 한 장씩 분류'}
+                >
+                  {isSingleMode ? '목록' : '확대'}
+                </button>
               </div>
-              {!isSingleMode && (
-                <div className="filter-bar">
-                  <label>
-                    <Search size={14} />
-                    <input
-                      value={searchText}
-                      onChange={(event) => setSearchText(event.target.value)}
-                      placeholder="파일명, 이름, 행사 검색"
-                    />
-                  </label>
-                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
-                    <option value="all">전체 상태</option>
-                    {STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select value={faceFilter} onChange={(event) => setFaceFilter(event.target.value as FaceFilter)}>
-                    <option value="all">전체 얼굴</option>
-                    <option value="has_face">얼굴 있음</option>
-                    <option value="no_face">얼굴 없음</option>
-                    <option value="not_scanned">미검사</option>
-                  </select>
-                  <button
-                    type="button"
-                    className={hideSorted ? 'filter-toggle active' : 'filter-toggle'}
-                    onClick={() => setHideSorted((value) => !value)}
-                    title={hideSorted ? '정리 끝난 사진도 모두 보기' : '정리 안 된 사진만 보기 (정리 끝난 건 자동 숨김)'}
-                  >
-                    {hideSorted ? '✓ 정리 안 됨만' : '☐ 정리 안 됨만'}
-                  </button>
-                  <button type="button" onClick={selectVisiblePhotos} disabled={!visiblePhotos.length}>
-                    보이는 사진 선택
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedIds([])}
-                    disabled={!selectedIds.length}
-                    title="선택된 사진을 모두 해제합니다."
-                  >
-                    선택 해제 ({selectedIds.length})
-                  </button>
-                  <button type="button" onClick={clearFilters} disabled={!searchText && statusFilter === 'all' && faceFilter === 'all'}>
-                    필터 해제
-                  </button>
-                  <span>{visibleSelectedCount}장 선택됨</span>
-                  <span className="filter-hint" title="←→ 사진 이동 · Space 선택 · 1 보관 · 2 대표 · 3 공개후보 · 4 제외">
-                    단축키: ←→ Space 1 2 3 4
-                  </span>
-                </div>
-              )}
               {isSingleMode && activePhoto && (
                 <SingleModeStage
                   photo={activePhoto}
@@ -2866,18 +2781,28 @@ function App() {
               </div>
               <div className="plan-tools">
                 <strong>⚙ 도구</strong>
-                <button type="button" onClick={() => rosterInputRef.current?.click()}>
-                  <Upload size={13} />
-                  학생 명단 CSV
-                </button>
-                <button type="button" onClick={() => projectInputRef.current?.click()}>
-                  <Upload size={13} />
-                  이어 하기
-                </button>
-                <button type="button" onClick={exportProject} disabled={!photos.length}>
-                  <Download size={13} />
-                  중간 저장
-                </button>
+                <label className="plan-tools-event">
+                  <span>행사명</span>
+                  <input
+                    value={eventInput}
+                    onChange={(event) => setEventInput(event.target.value)}
+                    placeholder="예: 봄 수련회"
+                  />
+                </label>
+                <div className="plan-tools-row">
+                  <button type="button" onClick={() => rosterInputRef.current?.click()}>
+                    <Upload size={13} />
+                    학생 명단 CSV
+                  </button>
+                  <button type="button" onClick={() => projectInputRef.current?.click()}>
+                    <Upload size={13} />
+                    이어 하기
+                  </button>
+                  <button type="button" onClick={exportProject} disabled={!photos.length}>
+                    <Download size={13} />
+                    중간 저장
+                  </button>
+                </div>
               </div>
               {personFolders.some((folder) => folder.candidatePhotoIds.length > 0) && (
                 <div className="candidate-panel">
