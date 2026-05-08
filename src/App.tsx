@@ -547,6 +547,7 @@ function App() {
   const [selectedFaceIndex, setSelectedFaceIndex] = useState<number | null>(null)
   const [viewerZoom, setViewerZoom] = useState(1)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState({ done: 0, total: 0 })
   const [isZipping, setIsZipping] = useState(false)
   const [isFolderSaving, setIsFolderSaving] = useState(false)
   const [isDriveSaving, setIsDriveSaving] = useState(false)
@@ -741,6 +742,9 @@ function App() {
     if (!files?.length) return
 
     const imageFiles = [...files].filter((file) => IMAGE_TYPES.includes(file.type) || file.type.startsWith('image/'))
+    if (!imageFiles.length) return
+
+    setAnalysisProgress({ done: 0, total: imageFiles.length })
     setIsAnalyzing(true)
 
     try {
@@ -748,6 +752,7 @@ function App() {
         imageFiles.map(async (file) => {
           const analysis = await analyzeImage(file)
           const modifiedAt = new Date(file.lastModified)
+          setAnalysisProgress((prev) => ({ done: prev.done + 1, total: prev.total }))
 
           return {
             id: `${file.name}-${file.lastModified}-${file.size}-${crypto.randomUUID()}`,
@@ -773,6 +778,7 @@ function App() {
       setActivePhotoId((current) => current ?? nextItems[0]?.id ?? null)
     } finally {
       setIsAnalyzing(false)
+      setAnalysisProgress({ done: 0, total: 0 })
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -1089,6 +1095,32 @@ function App() {
       ),
     )
     setPersonNameInput('')
+  }
+
+  function renamePersonFolder(folderId: string) {
+    const folder = personFolders.find((entry) => entry.id === folderId)
+    if (!folder) return
+    const next = window.prompt(`「${folder.name}」 새 이름`, folder.name)
+    if (!next) return
+    const trimmed = normalizeTag(next)
+    if (!trimmed || trimmed === folder.name) return
+    setPersonFolders((current) =>
+      current.map((entry) => (entry.id === folderId ? { ...entry, name: trimmed } : entry)),
+    )
+  }
+
+  function deletePersonFolder(folderId: string) {
+    const folder = personFolders.find((entry) => entry.id === folderId)
+    if (!folder) return
+    if (!window.confirm(`인물 폴더 「${folder.name}」을 지웁니다. 사진 자체는 남고 폴더 배정만 풀립니다.`)) return
+    setPersonFolders((current) => current.filter((entry) => entry.id !== folderId))
+    setPhotos((current) =>
+      current.map((photo) =>
+        photo.personFolderIds.includes(folderId)
+          ? { ...photo, personFolderIds: photo.personFolderIds.filter((id) => id !== folderId) }
+          : photo,
+      ),
+    )
   }
 
   function clearAll() {
@@ -1898,16 +1930,37 @@ function App() {
           <div className="person-folder-list">
             {personFolders.map((folder) => (
               <article key={folder.id} className="person-folder-card">
-                <button type="button" onClick={() => assignSelectedToPerson(folder.id)}>
+                <button
+                  type="button"
+                  onClick={() => assignSelectedToPerson(folder.id)}
+                  title="선택된 사진을 이 인물 폴더에 배정합니다."
+                >
                   <Users size={14} />
                   <span>{folder.name}</span>
                   <strong>{folder.photoIds.length}</strong>
                 </button>
-                <button type="button" onClick={() => findSimilarCandidates(folder.id)}>
+                <button
+                  type="button"
+                  onClick={() => findSimilarCandidates(folder.id)}
+                  title="대표 사진과 유사한 사진을 찾아 후보로 표시합니다."
+                >
                   <WandSparkles size={14} />
                   <span>후보 찾기</span>
                   <strong>{folder.candidatePhotoIds.length}</strong>
                 </button>
+                <div className="person-folder-tools">
+                  <button type="button" onClick={() => renamePersonFolder(folder.id)} title="이름 변경">
+                    이름 변경
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-link"
+                    onClick={() => deletePersonFolder(folder.id)}
+                    title="이 인물 폴더만 삭제 (사진은 유지)"
+                  >
+                    삭제
+                  </button>
+                </div>
               </article>
             ))}
             {!personFolders.length && (
@@ -2241,6 +2294,11 @@ function App() {
             <p className="dropzone-warning">
               새로고침하면 사진 목록이 사라집니다. 도중에 멈출 때는 상단의 「작업 저장」을 눌러 백업해 두세요.
             </p>
+            {isAnalyzing && analysisProgress.total > 0 && (
+              <p className="dropzone-progress" role="status">
+                사진 분석 중 {analysisProgress.done}/{analysisProgress.total}
+              </p>
+            )}
           </section>
         ) : (
           <div className="content-grid">
@@ -2258,7 +2316,13 @@ function App() {
                   <button type="button" onClick={() => moveActivePhoto(-1)} disabled={activeIndex <= 0}>
                     <ArrowLeft size={15} />
                   </button>
-                  <span>{isAnalyzing ? '분석 중...' : `${visiblePhotos.length}/${photos.length}장`}</span>
+                  <span>
+                    {isAnalyzing
+                      ? analysisProgress.total > 0
+                        ? `분석 중 ${analysisProgress.done}/${analysisProgress.total}`
+                        : '분석 중...'
+                      : `${visiblePhotos.length}/${photos.length}장`}
+                  </span>
                   <button
                     type="button"
                     onClick={() => moveActivePhoto(1)}

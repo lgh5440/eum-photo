@@ -333,6 +333,42 @@ button:disabled {
   gap: 7px;
 }
 
+.person-folder-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.person-folder-tools button {
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.person-folder-tools button:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.person-folder-tools .danger-link {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.32);
+}
+
+.person-folder-tools .danger-link:hover {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fecaca;
+}
+
 .person-folder-list button {
   min-height: 34px;
   border-radius: 8px;
@@ -756,6 +792,18 @@ h1 {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.4;
+}
+
+.dropzone-progress {
+  max-width: 520px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #eef4ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .dropzone-warning {
