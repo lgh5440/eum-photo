@@ -1063,20 +1063,33 @@ function App() {
     if (!file) return
 
     try {
-      const { names, consent } = parseRoster(await file.text())
+      const buffer = await file.arrayBuffer()
+      let text = new TextDecoder('utf-8', { fatal: false }).decode(buffer)
+      // UTF-8로 디코딩 시 한글이 깨지면 CP949(EUC-KR)로 재시도
+      if (/[�]/.test(text)) {
+        try {
+          text = new TextDecoder('euc-kr', { fatal: false }).decode(buffer)
+        } catch {
+          // EUC-KR 미지원 환경(드문) — 일단 UTF-8 결과 사용
+        }
+      }
+      const { names, consent } = parseRoster(text)
       setRosterNames(names)
       setRosterConsent(consent)
       const consentEntries = Object.values(consent)
       const consentMessage = consentEntries.length
         ? ` · 공개 동의 ${consentEntries.filter((value) => value === 'yes').length} / 미동의 ${consentEntries.filter((value) => value === 'no').length} / 미확인 ${consentEntries.filter((value) => value === 'unknown').length}`
         : ''
-      setRosterMessage(
-        names.length
-          ? `${names.length}명의 명단을 불러왔습니다.${consentMessage}`
-          : '명단에서 이름을 찾지 못했습니다.',
-      )
-    } catch {
-      setRosterMessage('CSV 명단을 읽지 못했습니다.')
+      if (!names.length) {
+        setRosterMessage(
+          '명단에서 이름을 찾지 못했습니다. CSV 첫 행에 「이름」/「성명」/「학생명」/「name」 같은 헤더가 있는지 확인해 주세요.',
+        )
+      } else {
+        setRosterMessage(`${names.length}명의 명단을 불러왔습니다.${consentMessage}`)
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '알 수 없음'
+      setRosterMessage(`CSV 명단을 읽지 못했습니다: ${reason}. 엑셀에서 「CSV UTF-8」로 다시 저장해 보세요.`)
     } finally {
       if (rosterInputRef.current) rosterInputRef.current.value = ''
     }
@@ -1584,8 +1597,13 @@ function App() {
     setArchivedPlans(next)
     try {
       window.localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(next))
-    } catch {
-      // storage may be unavailable (private mode, quota) — silently ignore
+    } catch (error) {
+      const reason = error instanceof Error ? error.name : 'unknown'
+      if (reason === 'QuotaExceededError' || /Quota/.test(reason)) {
+        setProjectMessage('누적 통계 저장 공간이 가득 찼어요. 「기록 비우기」로 오래된 기록부터 정리해 주세요.')
+      } else {
+        // 시크릿 모드 등 storage 차단 — 조용히 무시
+      }
     }
   }
 
@@ -1764,8 +1782,11 @@ function App() {
       setProjectMessage(
         `${matchedPhotoKeys.size}장의 사진 작업 상태를 불러왔습니다. 원본 사진을 먼저 추가해야 더 많이 복원됩니다.`,
       )
-    } catch {
-      setProjectMessage('이음 포토 프로젝트 JSON을 읽지 못했습니다.')
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '알 수 없음'
+      setProjectMessage(
+        `이음 포토 백업 파일을 읽지 못했습니다: ${reason}. 「중간 저장」으로 만든 .json 파일이 맞는지 확인해 주세요.`,
+      )
     } finally {
       if (projectInputRef.current) projectInputRef.current.value = ''
     }
@@ -1820,6 +1841,10 @@ function App() {
 
       const blob = await zip.generateAsync({ type: 'blob' })
       downloadBlob(`eum-photo-${eventSegment}.zip`, blob)
+      setProjectMessage(`ZIP 파일 ${photos.length}장을 받았습니다. 다운로드 폴더를 확인해 주세요.`)
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '알 수 없음'
+      setProjectMessage(`ZIP 만들기에 실패했어요: ${reason}. 사진 수가 너무 많거나 메모리가 부족할 수 있어요.`)
     } finally {
       setIsZipping(false)
     }
@@ -1881,8 +1906,15 @@ function App() {
       setProjectMessage(`${eventSegment} 폴더에 정리된 사진과 정리안 CSV/JSON을 저장했습니다.`)
     } catch (error) {
       const name = error instanceof DOMException ? error.name : ''
-      if (name !== 'AbortError') {
-        setProjectMessage('로컬 폴더 저장 중 문제가 발생했습니다. 정리본 ZIP을 대신 사용해 주세요.')
+      const reason = error instanceof Error ? error.message : '알 수 없음'
+      if (name === 'AbortError') {
+        // 사용자가 폴더 선택 취소 — 조용히 무시
+      } else if (name === 'NotAllowedError') {
+        setProjectMessage('폴더 쓰기 권한이 거부됐어요. 다시 시도하시거나 「ZIP 파일로 받기」를 사용해 주세요.')
+      } else if (name === 'NoModificationAllowedError') {
+        setProjectMessage('이 폴더는 잠겨 있어 저장할 수 없어요. 다른 폴더를 선택해 주세요.')
+      } else {
+        setProjectMessage(`로컬 폴더 저장 중 문제가 발생했어요: ${reason}. 「ZIP 파일로 받기」를 대신 사용해 주세요.`)
       }
     } finally {
       setIsFolderSaving(false)
@@ -1972,7 +2004,16 @@ function App() {
       setProjectMessage(`Google Drive 'eum-photo_${eventSegment}' 폴더에 ${photos.length}장과 정리안을 업로드했습니다.`)
     } catch (error) {
       const message = error instanceof Error ? error.message : '알 수 없는 오류'
-      setProjectMessage(`Google Drive 저장 중 문제가 발생했습니다: ${message}`)
+      const tip = /access_denied|popup_closed|popup_failed/i.test(message)
+        ? ' 로그인 창을 닫거나 권한을 거부하셨어요. 「결과 받기」를 다시 누른 뒤 「Google Drive에 올리기」를 시도해 주세요.'
+        : /401|invalid_token|unauthorized/i.test(message)
+        ? ' 로그인 세션이 만료됐어요. 다시 시도하면 새 로그인 창이 열립니다.'
+        : /403|quota|rate/i.test(message)
+        ? ' Drive 용량이 부족하거나 일일 업로드 한도에 가까워요. 잠시 후 다시 시도해 주세요.'
+        : /Failed to fetch|NetworkError/i.test(message)
+        ? ' 인터넷 연결을 확인해 주세요.'
+        : ''
+      setProjectMessage(`Google Drive에 올리지 못했어요: ${message}.${tip}`)
     } finally {
       setIsDriveSaving(false)
     }
@@ -2339,6 +2380,9 @@ function App() {
             <>
               <p className="cumulative-summary">
                 기록 {cumulativeStats.eventCount}건 · 누적 사진 {cumulativeStats.totalPhotos}장
+              </p>
+              <p className="cumulative-warning">
+                ※ 학생 이름이 이 컴퓨터 브라우저에만 저장됩니다. 공용 컴퓨터를 쓰셨다면 끝나고 「기록 비우기」를 눌러 주세요.
               </p>
               <div className="cumulative-archive">
                 {cumulativeStats.eventEntries.map((entry) => (
