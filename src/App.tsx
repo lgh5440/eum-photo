@@ -388,7 +388,12 @@ function getHashDistance(first: string, second: string) {
 }
 
 async function analyzeImage(file: File): Promise<AnalysisResult> {
-  const bitmap = await createImageBitmap(file)
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  } catch {
+    bitmap = await createImageBitmap(file)
+  }
   const width = bitmap.width
   const height = bitmap.height
   const sampleSize = 16
@@ -931,41 +936,84 @@ function App() {
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return
 
-    const imageFiles = [...files].filter((file) => IMAGE_TYPES.includes(file.type) || file.type.startsWith('image/'))
-    if (!imageFiles.length) return
+    const allFiles = [...files]
+    const imageFiles = allFiles.filter((file) => IMAGE_TYPES.includes(file.type) || file.type.startsWith('image/'))
+    if (!imageFiles.length) {
+      setProjectMessage('사진 파일이 없습니다. JPG/PNG/WebP/HEIC 사진을 선택해 주세요.')
+      return
+    }
+
+    const heicFiles = imageFiles.filter(
+      (file) =>
+        file.type === 'image/heic' ||
+        file.type === 'image/heif' ||
+        /\.heic$/i.test(file.name) ||
+        /\.heif$/i.test(file.name),
+    )
+    const heicSupported =
+      typeof document !== 'undefined' &&
+      (document.createElement('canvas').toDataURL('image/heic').startsWith('data:image/heic') ||
+        /AppleWebKit/.test(navigator.userAgent) && /Mac|iPhone|iPad/.test(navigator.userAgent))
 
     setAnalysisProgress({ done: 0, total: imageFiles.length })
     setIsAnalyzing(true)
+    const failures: Array<{ name: string; reason: string }> = []
 
     try {
-      const nextItems = await Promise.all(
-        imageFiles.map(async (file) => {
-          const analysis = await analyzeImage(file)
-          const modifiedAt = new Date(file.lastModified)
-          setAnalysisProgress((prev) => ({ done: prev.done + 1, total: prev.total }))
+      const nextItems: PhotoItem[] = (
+        await Promise.all(
+          imageFiles.map(async (file): Promise<PhotoItem | null> => {
+            try {
+              const analysis = await analyzeImage(file)
+              const modifiedAt = new Date(file.lastModified)
+              setAnalysisProgress((prev) => ({ done: prev.done + 1, total: prev.total }))
 
-          return {
-            id: `${file.name}-${file.lastModified}-${file.size}-${crypto.randomUUID()}`,
-            file,
-            url: URL.createObjectURL(file),
-            name: file.name,
-            size: file.size,
-            modifiedAt,
-            dateKey: getDateKey(modifiedAt),
-            eventTag: normalizeTag(eventInput) || '주일학교',
-            studentTags: [],
-            personFolderIds: [],
-            status: 'keep' as const,
-            faceCount: null,
-            faceBoxes: [],
-            faceScanStatus: 'idle' as const,
-            ...analysis,
-          }
-        }),
-      )
+              const item: PhotoItem = {
+                id: `${file.name}-${file.lastModified}-${file.size}-${crypto.randomUUID()}`,
+                file,
+                url: URL.createObjectURL(file),
+                name: file.name,
+                size: file.size,
+                modifiedAt,
+                dateKey: getDateKey(modifiedAt),
+                eventTag: normalizeTag(eventInput) || '주일학교',
+                studentTags: [],
+                personFolderIds: [],
+                status: 'keep',
+                faceCount: null,
+                faceBoxes: [],
+                faceScanStatus: 'idle',
+                ...analysis,
+              }
+              return item
+            } catch (error) {
+              setAnalysisProgress((prev) => ({ done: prev.done + 1, total: prev.total }))
+              const reason = error instanceof Error ? error.message : '알 수 없음'
+              failures.push({ name: file.name, reason })
+              return null
+            }
+          }),
+        )
+      ).filter((item): item is PhotoItem => item !== null)
 
-      setPhotos((current) => [...nextItems, ...current])
-      setActivePhotoId((current) => current ?? nextItems[0]?.id ?? null)
+      if (nextItems.length) {
+        setPhotos((current) => [...nextItems, ...current])
+        setActivePhotoId((current) => current ?? nextItems[0]?.id ?? null)
+      }
+
+      const heicWarning =
+        heicFiles.length > 0 && !heicSupported
+          ? ` HEIC 사진 ${heicFiles.length}장이 포함되어 있어요. 이 브라우저에서 사진이 안 보이면 PC에서 JPG로 변환한 뒤 다시 넣어 주세요.`
+          : ''
+      const failureNames = failures.slice(0, 3).map((f) => f.name).join(', ')
+      const failureNote =
+        failures.length > 0
+          ? ` 일부 사진(${failures.length}장)을 읽지 못했습니다${failureNames ? ': ' + failureNames + (failures.length > 3 ? ' 등' : '') : ''}.`
+          : ''
+      const message = `${nextItems.length}장을 추가했어요.${heicWarning}${failureNote}`
+      if (heicWarning || failureNote || nextItems.length === 0) {
+        setProjectMessage(message)
+      }
     } finally {
       setIsAnalyzing(false)
       setAnalysisProgress({ done: 0, total: 0 })
@@ -1955,6 +2003,46 @@ function App() {
   }, [photos.length])
 
   useEffect(() => {
+    if (!isResultModalOpen) return
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const modal = document.querySelector<HTMLElement>('.result-modal')
+    if (!modal) return
+
+    const focusables = modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )
+    focusables[0]?.focus()
+
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setIsResultModalOpen(false)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const list = modal!.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      if (!list.length) return
+      const first = list[0]
+      const last = list[list.length - 1]
+      const active = document.activeElement
+      if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      previouslyFocused?.focus()
+    }
+  }, [isResultModalOpen])
+
+  useEffect(() => {
     if (!isPlanMenuOpen) return
     function handleClickOutside(event: MouseEvent) {
       if (planMenuRef.current && !planMenuRef.current.contains(event.target as Node)) {
@@ -2812,7 +2900,7 @@ function App() {
               </button>
             </header>
             <div className="result-cards">
-              {window.showDirectoryPicker && (
+              {typeof window !== 'undefined' && window.showDirectoryPicker && (
                 <button
                   type="button"
                   className="result-card primary"
