@@ -302,12 +302,13 @@ const STATUS_OPTIONS: Array<{
   value: PhotoStatus
   label: string
   shortLabel: string
+  description: string
   icon: typeof Archive
 }> = [
-  { value: 'keep', label: '보관', shortLabel: '보관', icon: Archive },
-  { value: 'featured', label: '대표 사진', shortLabel: '대표', icon: Star },
-  { value: 'public_candidate', label: '공개 후보', shortLabel: '공개후보', icon: Eye },
-  { value: 'exclude', label: '제외', shortLabel: '제외', icon: XCircle },
+  { value: 'keep', label: '쓸 사진', shortLabel: '쓸 사진', description: '나중에 쓸 수도 있는 보통 사진', icon: Archive },
+  { value: 'featured', label: '잘 나온 사진', shortLabel: '잘 나옴', description: '가장 잘 찍힌 사진 (대표 사진)', icon: Star },
+  { value: 'public_candidate', label: '단톡방 OK', shortLabel: '공유 OK', description: '학부모 단톡방·교회 카페에 올려도 되는 사진', icon: Eye },
+  { value: 'exclude', label: '안 쓸 사진', shortLabel: '안 씀', description: '흐림·불필요·민감 — 결과물에서 빼는 사진', icon: XCircle },
 ]
 const STATUS_LABELS = new Map(STATUS_OPTIONS.map((option) => [option.value, option.label]))
 const STATUS_FOLDER_LABELS: Record<PhotoStatus, string> = {
@@ -529,6 +530,137 @@ async function writeFileToDirectory(directory: WritableDirectoryHandle, filename
   await writable.close()
 }
 
+type SingleModeStageProps = {
+  photo: PhotoItem
+  index: number
+  total: number
+  onPrev: () => void
+  onNext: () => void
+  onClassify: (status: PhotoStatus, label: string) => void
+  rosterNames: string[]
+  rosterConsent: Record<string, ConsentState>
+  onQuickTag: (name: string) => void
+  consent: { yes: string[]; no: string[]; unknown: string[] } | undefined
+}
+
+function SingleModeStage({
+  photo,
+  index,
+  total,
+  onPrev,
+  onNext,
+  onClassify,
+  rosterNames,
+  rosterConsent,
+  onQuickTag,
+  consent,
+}: SingleModeStageProps) {
+  const progressPercent = total > 0 ? Math.round(((index + 1) / total) * 100) : 0
+  const isLast = index >= total - 1
+  const consentDenied = consent && consent.no.length > 0
+  const consentUnknown = consent && !consent.no.length && consent.unknown.length > 0 && !consent.yes.length
+  const shownTags = photo.studentTags
+
+  return (
+    <div className="single-mode-stage">
+      <div className="single-mode-progress">
+        <strong>
+          {index + 1} / {total}
+        </strong>
+        <div className="single-mode-progress-bar">
+          <div className="single-mode-progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <span>{progressPercent}%</span>
+      </div>
+      <div className="single-mode-photo">
+        <img src={photo.url} alt={photo.name} />
+        {consentDenied && (
+          <div className="single-mode-consent-warning">⚠ 단톡방 공유 안 됨: {consent.no.join(', ')}</div>
+        )}
+        {!consentDenied && consentUnknown && (
+          <div className="single-mode-consent-soft">동의 확인 필요: {consent.unknown.join(', ')}</div>
+        )}
+      </div>
+      <div className="single-mode-tags">
+        <strong>이 사진에 누가 있나요?</strong>
+        {shownTags.length > 0 && (
+          <div className="single-mode-current-tags">
+            {shownTags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        )}
+        {rosterNames.length > 0 ? (
+          <div className="single-mode-roster">
+            {rosterNames.map((name) => {
+              const consentState = rosterConsent[name]
+              const already = shownTags.includes(name)
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => onQuickTag(name)}
+                  disabled={already}
+                  className={
+                    already
+                      ? 'roster-chip-covered'
+                      : consentState === 'no'
+                      ? 'consent-no'
+                      : consentState === 'unknown'
+                      ? 'consent-unknown'
+                      : ''
+                  }
+                  title={already ? '이미 추가된 이름' : `「${name}」 태그 추가`}
+                >
+                  {already ? '✓ ' : ''}
+                  {name}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="single-mode-roster-hint">
+            왼쪽 사이드바 「학생 명단 CSV」에서 명단을 불러오면 여기서 한 번에 태그할 수 있어요.
+          </p>
+        )}
+      </div>
+      <div className="single-mode-actions">
+        <button type="button" className="single-mode-keep" onClick={() => onClassify('keep', '쓸 사진')}>
+          <Archive size={28} />
+          <span>쓸 사진</span>
+          <small>나중에 쓸 수도 있는 사진</small>
+        </button>
+        <button type="button" className="single-mode-exclude" onClick={() => onClassify('exclude', '안 쓸 사진')}>
+          <XCircle size={28} />
+          <span>안 쓸 사진</span>
+          <small>흐림·불필요 — 결과에서 빠짐</small>
+        </button>
+      </div>
+      <div className="single-mode-actions-secondary">
+        <button type="button" onClick={() => onClassify('featured', '잘 나온 사진')}>
+          <Star size={20} />
+          <span>잘 나온 사진</span>
+        </button>
+        <button type="button" onClick={() => onClassify('public_candidate', '단톡방 OK')}>
+          <Eye size={20} />
+          <span>단톡방 OK</span>
+        </button>
+      </div>
+      <div className="single-mode-nav">
+        <button type="button" onClick={onPrev} disabled={index <= 0} title="이전 사진">
+          <ArrowLeft size={18} />
+          이전
+        </button>
+        <span className="single-mode-current-status">현재: {STATUS_LABELS.get(photo.status) ?? photo.status}</span>
+        <button type="button" onClick={onNext} disabled={isLast} title="다음 사진 (분류 안 하고 넘김)">
+          건너뛰기
+          <ArrowRight size={18} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [studentInput, setStudentInput] = useState('')
@@ -554,6 +686,13 @@ function App() {
   const [isPlanMenuOpen, setIsPlanMenuOpen] = useState(false)
   const planMenuRef = useRef<HTMLDivElement | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false)
+  const [isSingleMode, setIsSingleMode] = useState(false)
+  const [undoSnapshot, setUndoSnapshot] = useState<{
+    photos: PhotoItem[]
+    personFolders: PersonFolder[]
+    label: string
+  } | null>(null)
   const [isFaceScanning, setIsFaceScanning] = useState(false)
   const [faceScanMessage, setFaceScanMessage] = useState('')
   const [projectMessage, setProjectMessage] = useState('')
@@ -677,21 +816,72 @@ function App() {
     return result
   }, [personFolderById, photos, rosterConsent])
 
+  const sortedCount = useMemo(
+    () => photos.filter((photo) => photo.status !== 'keep' || photo.studentTags.length > 0 || photo.personFolderIds.length > 0).length,
+    [photos],
+  )
+
+  const workflowSteps = useMemo(() => {
+    const hasPhotos = photos.length > 0
+    const hasEvent = Boolean(normalizeTag(eventInput))
+    const allSorted = hasPhotos && sortedCount === photos.length
+    const sortStarted = sortedCount > 0
+    const photoStep = hasPhotos ? 'done' : 'active'
+    const eventStep = !hasPhotos ? 'idle' : hasEvent ? 'done' : 'active'
+    const sortStep = !hasPhotos
+      ? 'idle'
+      : !hasEvent
+      ? 'idle'
+      : allSorted
+      ? 'done'
+      : sortStarted
+      ? 'active'
+      : 'active'
+    const resultStep = allSorted && hasEvent ? 'active' : 'idle'
+
+    return [
+      {
+        key: 'photos',
+        label: '사진 추가',
+        hint: hasPhotos ? `${photos.length}장 추가됨` : '사진을 끌어오세요',
+        state: photoStep as 'idle' | 'active' | 'done',
+      },
+      {
+        key: 'event',
+        label: '행사명',
+        hint: hasEvent ? `「${normalizeTag(eventInput)}」` : '행사명을 적어 주세요',
+        state: eventStep as 'idle' | 'active' | 'done',
+      },
+      {
+        key: 'sort',
+        label: '사진 분류',
+        hint: hasPhotos ? `${sortedCount}/${photos.length}장 분류됨` : '아직',
+        state: sortStep as 'idle' | 'active' | 'done',
+      },
+      {
+        key: 'result',
+        label: '결과 받기',
+        hint: resultStep === 'active' ? '준비 완료' : '분류 끝나면',
+        state: resultStep as 'idle' | 'active' | 'done',
+      },
+    ]
+  }, [eventInput, photos.length, sortedCount])
+
   const reviewIssues = useMemo(() => {
     return photos
       .flatMap((photo) => {
         const labels: string[] = []
         const hasName = photo.studentTags.length > 0 || photo.personFolderIds.length > 0
 
-        if (photo.status === 'public_candidate' && !hasName) labels.push('공개 후보 이름 미지정')
-        if (photo.status === 'featured' && photo.blurScore < BLUR_THRESHOLD) labels.push('대표 사진 흐림')
-        if (photo.status === 'featured' && duplicateHashes.has(photo.hash)) labels.push('대표 사진 중복 후보')
-        if (photo.status !== 'exclude' && photo.faceScanStatus === 'done' && photo.faceCount === 0) labels.push('인물 없음')
+        if (photo.status === 'public_candidate' && !hasName) labels.push('공유 사진에 이름이 안 적혀 있어요')
+        if (photo.status === 'featured' && photo.blurScore < BLUR_THRESHOLD) labels.push('잘 나온 사진인데 흐릿해요')
+        if (photo.status === 'featured' && duplicateHashes.has(photo.hash)) labels.push('잘 나온 사진과 비슷한 사진이 또 있어요')
+        if (photo.status !== 'exclude' && photo.faceScanStatus === 'done' && photo.faceCount === 0) labels.push('얼굴이 안 보여요')
 
         const consent = photoConsentByPhotoId.get(photo.id)
         if (consent && photo.status === 'public_candidate') {
-          if (consent.no.length) labels.push(`공개 미동의: ${consent.no.join(', ')}`)
-          else if (consent.unknown.length && !consent.yes.length) labels.push('공개 동의 미확인')
+          if (consent.no.length) labels.push(`단톡방 공유 안 됨: ${consent.no.join(', ')}`)
+          else if (consent.unknown.length && !consent.yes.length) labels.push('단톡방 공유 동의 확인 필요')
         }
 
         return labels.map((label) => ({ id: `${photo.id}-${label}`, photo, label }))
@@ -806,6 +996,7 @@ function App() {
 
     if (!selectedIds.length || (!tags.length && !eventTag)) return
 
+    captureSnapshot(`${selectedIds.length}장에 학생 이름 태그`)
     setPhotos((current) =>
       current.map((photo) => {
         if (!selectedIds.includes(photo.id)) return photo
@@ -855,6 +1046,7 @@ function App() {
       return
     }
 
+    captureSnapshot(`${selectedIds.length}장에 「${name}」 태그`)
     setPhotos((current) =>
       current.map((photo) =>
         selectedIds.includes(photo.id)
@@ -869,6 +1061,7 @@ function App() {
     const representativePhotoId = viewerPhotoId ?? activePhotoId ?? photos[0]?.id
     if (!name || !representativePhotoId) return
 
+    captureSnapshot(`「${name}」 사람별 모음 만들기`)
     const folderId = `person-${crypto.randomUUID()}`
     setPersonFolders((current) => [
       ...current,
@@ -893,6 +1086,8 @@ function App() {
 
   function assignSelectedToPerson(folderId: string) {
     if (!selectedIds.length) return
+    const folderName = personFolderById.get(folderId)?.name ?? '사람별 모음'
+    captureSnapshot(`${selectedIds.length}장을 「${folderName}」에 배정`)
     setPersonFolders((current) =>
       current.map((folder) =>
         folder.id === folderId
@@ -938,6 +1133,7 @@ function App() {
   }
 
   function approveCandidate(folderId: string, photoId: string) {
+    captureSnapshot('후보 승인')
     setPersonFolders((current) =>
       current.map((folder) =>
         folder.id === folderId
@@ -962,6 +1158,7 @@ function App() {
   }
 
   function rejectCandidate(folderId: string, photoId: string) {
+    captureSnapshot('후보 제외')
     setPersonFolders((current) =>
       current.map((folder) =>
         folder.id === folderId
@@ -1037,14 +1234,43 @@ function App() {
     )
   }, [])
 
+  function classifyAndAdvance(status: PhotoStatus, statusLabel: string) {
+    const targetId = activePhotoId ?? photos[0]?.id
+    if (!targetId) return
+    captureSnapshot(`「${statusLabel}」로 분류`)
+    setStatusForPhotos([targetId], status)
+    const targetIndex = photos.findIndex((photo) => photo.id === targetId)
+    if (targetIndex >= 0 && targetIndex < photos.length - 1) {
+      setActivePhotoId(photos[targetIndex + 1].id)
+    } else {
+      setProjectMessage('마지막 사진까지 분류했어요. 「결과 받기」를 누를 차례입니다.')
+    }
+  }
+
+  function quickTagActive(name: string) {
+    const targetId = activePhotoId ?? photos[0]?.id
+    if (!targetId) return
+    captureSnapshot(`사진에 「${name}」 태그`)
+    setPhotos((current) =>
+      current.map((photo) =>
+        photo.id === targetId
+          ? { ...photo, studentTags: [...new Set([...photo.studentTags, name])] }
+          : photo,
+      ),
+    )
+  }
+
   const setActivePhotoStatus = useCallback((status: PhotoStatus) => {
     const targetId = activePhotoId ?? photos[0]?.id
     if (!targetId) return
+    const label = STATUS_LABELS.get(status) ?? status
+    captureSnapshot(`「${label}」로 분류`)
     setStatusForPhotos([targetId], status)
     const targetIndex = photos.findIndex((photo) => photo.id === targetId)
     if (targetIndex >= 0 && targetIndex < photos.length - 1) {
       setActivePhotoId(photos[targetIndex + 1].id)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePhotoId, photos, setStatusForPhotos])
 
   const moveViewerPhoto = useCallback((direction: -1 | 1) => {
@@ -1123,9 +1349,35 @@ function App() {
     )
   }
 
+  function captureSnapshot(label: string) {
+    setUndoSnapshot({
+      photos: photos.map((photo) => ({
+        ...photo,
+        studentTags: [...photo.studentTags],
+        personFolderIds: [...photo.personFolderIds],
+        faceBoxes: photo.faceBoxes.map((box) => ({ ...box })),
+      })),
+      personFolders: personFolders.map((folder) => ({
+        ...folder,
+        photoIds: [...folder.photoIds],
+        candidatePhotoIds: [...folder.candidatePhotoIds],
+        candidateScores: { ...folder.candidateScores },
+      })),
+      label,
+    })
+  }
+
+  function performUndo() {
+    if (!undoSnapshot) return
+    setPhotos(undoSnapshot.photos)
+    setPersonFolders(undoSnapshot.personFolders)
+    setProjectMessage(`되돌렸어요: ${undoSnapshot.label}`)
+    setUndoSnapshot(null)
+  }
+
   function clearAll() {
     if (!photos.length) return
-    const message = `사진 ${photos.length}장과 인물 폴더, 선별 상태가 모두 사라집니다. 계속할까요?\n\n저장하지 않은 작업은 「작업 저장」을 먼저 누르세요.`
+    const message = `사진 ${photos.length}장과 인물 폴더, 선별 상태가 모두 사라집니다. 계속할까요?\n\n저장하지 않은 작업은 「중간 저장」을 먼저 누르세요.`
     if (!window.confirm(message)) return
 
     photos.forEach((photo) => URL.revokeObjectURL(photo.url))
@@ -1807,7 +2059,7 @@ function App() {
         />
 
         <section className="panel compact-panel">
-          <h2>정리 기준</h2>
+          <h2>1. 행사 / 학생 이름 적기</h2>
           <label>
             행사명
             <input
@@ -1878,7 +2130,7 @@ function App() {
                     ? 'consent-unknown'
                     : ''
                 const consentLabel =
-                  consent === 'yes' ? '공개 동의' : consent === 'no' ? '공개 미동의' : consent === 'unknown' ? '동의 미확인' : ''
+                  consent === 'yes' ? '단톡방 공유 OK' : consent === 'no' ? '단톡방 공유 안 됨' : consent === 'unknown' ? '동의 확인 필요' : ''
                 const baseTitle = count > 0 ? `${count}장 매칭됨` : '아직 매칭된 사진 없음'
                 return (
                   <button
@@ -1914,7 +2166,7 @@ function App() {
         </section>
 
         <section className="panel compact-panel">
-          <h2>인물 폴더</h2>
+          <h2>사람별 모음 (인물 폴더)</h2>
           <label>
             인물 이름
             <input
@@ -1973,7 +2225,7 @@ function App() {
         </section>
 
         <section className="panel compact-panel">
-          <h2>인물 사진 찾기</h2>
+          <h2>얼굴 자동으로 찾기</h2>
           <button className="secondary-action" type="button" onClick={() => void scanPeoplePhotos()} disabled={!photos.length || isFaceScanning}>
             <Search size={16} />
             {isFaceScanning ? '얼굴 찾는 중' : '얼굴 있는 사진 찾기'}
@@ -2035,8 +2287,8 @@ function App() {
         </section>
 
         <section className="panel compact-panel">
-          <h2>선택 사진 상태 변경</h2>
-          <p className="panel-hint">사진을 먼저 선택한 뒤 상태를 일괄 적용합니다. 키보드 단축키 1·2·3·4도 같은 동작.</p>
+          <h2>2. 선택한 사진 분류하기</h2>
+          <p className="panel-hint">여러 사진을 클릭해서 선택한 뒤 아래 버튼을 누르면 한 번에 분류됩니다. 한 장씩 빠르게 처리하려면 위쪽 「한 장씩 빠르게 분류」 버튼을 사용하세요.</p>
           <div className="status-actions">
             {STATUS_OPTIONS.map((option) => {
               const Icon = option.icon
@@ -2046,9 +2298,12 @@ function App() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setStatusForPhotos(selectedIds, option.value)}
+                  onClick={() => {
+                    captureSnapshot(`${selectedIds.length}장 「${option.label}」로 분류`)
+                    setStatusForPhotos(selectedIds, option.value)
+                  }}
                   disabled={!selectedCount}
-                  title={`${option.label} (단축키 ${shortcut})`}
+                  title={`${option.label} — ${option.description}`}
                 >
                   <Icon size={15} />
                   {option.label}
@@ -2096,113 +2351,54 @@ function App() {
               hidden
               onChange={(event) => void importProject(event.target.files)}
             />
-            <div className="top-actions-group" aria-label="작업 백업">
+            {undoSnapshot && (
+              <button
+                type="button"
+                className="undo-action"
+                onClick={performUndo}
+                title={`되돌리기: ${undoSnapshot.label}`}
+              >
+                <ArrowLeft size={16} />
+                방금 동작 취소
+              </button>
+            )}
+            <div className="top-actions-group" aria-label="이어 하기">
               <button
                 type="button"
                 onClick={() => projectInputRef.current?.click()}
-                title="이전에 저장한 작업 JSON을 불러와 태그·상태·인물 폴더를 복원합니다."
+                title="이전에 저장해둔 정리 진행 상황을 다시 불러옵니다."
               >
                 <Upload size={16} />
-                작업 불러오기
+                이어 하기
               </button>
               <button
                 type="button"
                 onClick={exportProject}
                 disabled={!photos.length}
-                title="현재 화면 상태(태그·상태·얼굴 박스·인물 폴더)를 JSON으로 저장합니다. 사진 원본은 포함하지 않습니다."
+                title="지금까지 정리한 내용(태그·분류·사람별 모음)을 작은 백업 파일로 저장해 둡니다. 사진 원본은 포함되지 않아요."
               >
                 <Download size={16} />
-                작업 저장
+                중간 저장
               </button>
             </div>
             <span className="top-actions-divider" aria-hidden="true" />
-            <div className="top-actions-group" aria-label="사진 내보내기">
-              <button
-                type="button"
-                onClick={() => void exportToLocalFolder()}
-                disabled={!photos.length || isFolderSaving}
-                title="Chrome/Edge에서 선택한 폴더에 행사/상태/인물별로 사진과 정리안을 직접 저장합니다."
-              >
-                <FolderInput size={16} />
-                {isFolderSaving ? '폴더 저장 중' : '로컬 폴더 저장'}
-              </button>
-              <button
-                type="button"
-                onClick={() => void exportOrganizedZip()}
-                disabled={!photos.length || isZipping}
-                title="모든 사진을 행사/상태/인물 폴더 구조로 묶은 ZIP을 다운로드합니다. 어떤 브라우저든 사용 가능."
-              >
-                <Download size={16} />
-                {isZipping ? 'ZIP 생성 중' : '정리본 ZIP'}
-              </button>
-              {GOOGLE_CLIENT_ID && (
-                <button
-                  type="button"
-                  onClick={() => void exportToGoogleDrive()}
-                  disabled={!photos.length || isDriveSaving}
-                  title="구글 드라이브에 행사 폴더를 만들고 사진과 정리안을 업로드합니다."
-                >
-                  <Upload size={16} />
-                  {isDriveSaving ? 'Drive 업로드 중' : 'Google Drive'}
-                </button>
-              )}
-            </div>
-            <span className="top-actions-divider" aria-hidden="true" />
-            <div className="top-actions-group dropdown-host" ref={planMenuRef} aria-label="정리표만 내보내기">
-              <button
-                type="button"
-                className={isPlanMenuOpen ? 'dropdown-trigger open' : 'dropdown-trigger'}
-                onClick={() => setIsPlanMenuOpen((value) => !value)}
-                disabled={!photos.length}
-                aria-haspopup="menu"
-                aria-expanded={isPlanMenuOpen}
-                title="사진은 빼고 정리안 파일만 받습니다. 이음 스쿨이나 보고용으로 활용."
-              >
-                <Download size={16} />
-                정리표 ▾
-              </button>
-              {isPlanMenuOpen && (
-                <div className="dropdown-popover" role="menu">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      exportPlan()
-                      setIsPlanMenuOpen(false)
-                    }}
-                    title="엑셀이나 표 도구로 바로 열 수 있는 표 형식."
-                  >
-                    <Download size={14} />
-                    <span>
-                      <strong>정리안 CSV</strong>
-                      <small>엑셀에서 바로 열기</small>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      exportPlanJson()
-                      setIsPlanMenuOpen(false)
-                    }}
-                    title="이음 스쿨 등 다른 도구로 가져갈 때 쓰는 구조화 데이터."
-                  >
-                    <Download size={14} />
-                    <span>
-                      <strong>정리안 JSON</strong>
-                      <small>이음 스쿨·도구 연계용</small>
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              className="result-action"
+              onClick={() => setIsResultModalOpen(true)}
+              disabled={!photos.length}
+              title="정리 다 끝나셨어요? 사진을 어떻게 받을지 골라주세요."
+            >
+              <Download size={18} />
+              결과 받기
+            </button>
             <span className="top-actions-divider" aria-hidden="true" />
             <button
               type="button"
               className="danger-action"
               onClick={clearAll}
               disabled={!photos.length}
-              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다. 저장하지 않은 작업은 「작업 저장」으로 백업한 뒤 사용하세요."
+              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다. 저장하지 않은 작업은 먼저 「중간 저장」으로 백업하세요."
             >
               <Trash2 size={16} />
               비우기
@@ -2215,6 +2411,20 @@ function App() {
             {projectMessage}
           </div>
         )}
+
+        <ol className="workflow-stepper" aria-label="작업 진행 상황">
+          {workflowSteps.map((step, index) => (
+            <li key={step.key} className={`workflow-step workflow-step-${step.state}`}>
+              <span className="workflow-step-num" aria-hidden="true">
+                {step.state === 'done' ? '✓' : index + 1}
+              </span>
+              <div>
+                <strong>{step.label}</strong>
+                <small>{step.hint}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
 
         <section className="metrics">
           <article title="현재 화면에 들어와 있는 전체 사진 수">
@@ -2305,14 +2515,24 @@ function App() {
             <section className="photo-board">
               <div className="section-heading">
                 <div>
-                  <h2>사진 목록</h2>
+                  <h2>{isSingleMode ? '한 장씩 분류하기' : '사진 목록'}</h2>
                   <p>
-                    {activePhoto
+                    {isSingleMode
+                      ? '큰 사진을 보면서 「쓸 사진 / 안 쓸 사진」 버튼만 누르세요. 자동으로 다음 사진으로 넘어가요.'
+                      : activePhoto
                       ? `${activeIndex + 1}/${photos.length} · ${activePhoto.name}`
                       : '사진을 클릭해 활성화하면 단축키로 빠르게 분류할 수 있어요.'}
                   </p>
                 </div>
                 <div className="heading-actions">
+                  <button
+                    type="button"
+                    className={isSingleMode ? 'single-mode-toggle active' : 'single-mode-toggle'}
+                    onClick={() => setIsSingleMode((value) => !value)}
+                    title={isSingleMode ? '여러 사진을 한 번에 보는 화면으로 돌아갑니다.' : '한 장씩 큰 화면에서 빠르게 분류합니다.'}
+                  >
+                    {isSingleMode ? '목록으로 돌아가기' : '한 장씩 빠르게 분류'}
+                  </button>
                   <button type="button" onClick={() => moveActivePhoto(-1)} disabled={activeIndex <= 0}>
                     <ArrowLeft size={15} />
                   </button>
@@ -2332,40 +2552,62 @@ function App() {
                   </button>
                 </div>
               </div>
-              <div className="filter-bar">
-                <label>
-                  <Search size={14} />
-                  <input
-                    value={searchText}
-                    onChange={(event) => setSearchText(event.target.value)}
-                    placeholder="파일명, 이름, 행사 검색"
-                  />
-                </label>
-                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
-                  <option value="all">전체 상태</option>
-                  {STATUS_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <select value={faceFilter} onChange={(event) => setFaceFilter(event.target.value as FaceFilter)}>
-                  <option value="all">전체 얼굴</option>
-                  <option value="has_face">얼굴 있음</option>
-                  <option value="no_face">얼굴 없음</option>
-                  <option value="not_scanned">미검사</option>
-                </select>
-                <button type="button" onClick={selectVisiblePhotos} disabled={!visiblePhotos.length}>
-                  보이는 사진 선택
-                </button>
-                <button type="button" onClick={clearFilters} disabled={!searchText && statusFilter === 'all' && faceFilter === 'all'}>
-                  필터 해제
-                </button>
-                <span>{visibleSelectedCount}장 선택됨</span>
-                <span className="filter-hint" title="←→ 사진 이동 · Space 선택 · 1 보관 · 2 대표 · 3 공개후보 · 4 제외">
-                  단축키: ←→ Space 1 2 3 4
-                </span>
-              </div>
+              {!isSingleMode && (
+                <div className="filter-bar">
+                  <label>
+                    <Search size={14} />
+                    <input
+                      value={searchText}
+                      onChange={(event) => setSearchText(event.target.value)}
+                      placeholder="파일명, 이름, 행사 검색"
+                    />
+                  </label>
+                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
+                    <option value="all">전체 상태</option>
+                    {STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select value={faceFilter} onChange={(event) => setFaceFilter(event.target.value as FaceFilter)}>
+                    <option value="all">전체 얼굴</option>
+                    <option value="has_face">얼굴 있음</option>
+                    <option value="no_face">얼굴 없음</option>
+                    <option value="not_scanned">미검사</option>
+                  </select>
+                  <button type="button" onClick={selectVisiblePhotos} disabled={!visiblePhotos.length}>
+                    보이는 사진 선택
+                  </button>
+                  <button type="button" onClick={clearFilters} disabled={!searchText && statusFilter === 'all' && faceFilter === 'all'}>
+                    필터 해제
+                  </button>
+                  <span>{visibleSelectedCount}장 선택됨</span>
+                  <span className="filter-hint" title="←→ 사진 이동 · Space 선택 · 1 보관 · 2 대표 · 3 공개후보 · 4 제외">
+                    단축키: ←→ Space 1 2 3 4
+                  </span>
+                </div>
+              )}
+              {isSingleMode && activePhoto && (
+                <SingleModeStage
+                  photo={activePhoto}
+                  index={activeIndex}
+                  total={photos.length}
+                  onPrev={() => moveActivePhoto(-1)}
+                  onNext={() => moveActivePhoto(1)}
+                  onClassify={classifyAndAdvance}
+                  rosterNames={rosterNames}
+                  rosterConsent={rosterConsent}
+                  onQuickTag={quickTagActive}
+                  consent={photoConsentByPhotoId.get(activePhoto.id)}
+                />
+              )}
+              {isSingleMode && !activePhoto && (
+                <div className="single-mode-empty">
+                  <p>분류할 사진이 없습니다. 「목록으로 돌아가기」를 누르세요.</p>
+                </div>
+              )}
+              {!isSingleMode && (
               <div className="photo-grid">
                 {visiblePhotos.map((photo) => {
                   const selected = selectedIds.includes(photo.id)
@@ -2407,13 +2649,13 @@ function App() {
                       <div className="chips">
                         <span className={`status ${photo.status}`}>{STATUS_LABELS.get(photo.status)}</span>
                         {consentDenied && (
-                          <span className="warn-strong" title={`공개 미동의: ${consent.no.join(', ')}`}>
-                            공개 미동의: {consent.no.join(', ')}
+                          <span className="warn-strong" title={`단톡방 공유 안 됨: ${consent.no.join(', ')}`}>
+                            단톡방 X · {consent.no.join(', ')}
                           </span>
                         )}
                         {consentUnknown && (
-                          <span className="warn" title={`동의 미확인: ${consent.unknown.join(', ')}`}>
-                            동의 미확인
+                          <span className="warn" title={`단톡방 공유 동의 확인 필요: ${consent.unknown.join(', ')}`}>
+                            동의 확인 필요
                           </span>
                         )}
                         {duplicate && <span className="warn">중복 후보</span>}
@@ -2443,8 +2685,11 @@ function App() {
                               key={option.value}
                               type="button"
                               className={photo.status === option.value ? 'active' : ''}
-                              onClick={() => setStatusForPhotos([photo.id], option.value)}
-                              title={`${option.label} (단축키 ${shortcut})`}
+                              onClick={() => {
+                                captureSnapshot(`「${option.label}」로 분류`)
+                                setStatusForPhotos([photo.id], option.value)
+                              }}
+                              title={`${option.label} — ${option.description}`}
                             >
                               <Icon size={13} />
                               <span>{option.shortLabel}</span>
@@ -2457,6 +2702,7 @@ function App() {
                   )
                 })}
               </div>
+              )}
             </section>
 
             <section className="plan-panel">
@@ -2547,8 +2793,85 @@ function App() {
           </div>
         )}
       </section>
+      {isResultModalOpen && (
+        <div
+          className="result-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="결과 받기"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsResultModalOpen(false)
+          }}
+        >
+          <section className="result-modal">
+            <header>
+              <h2>정리 끝나셨어요? 사진을 어떻게 받을까요?</h2>
+              <p>아래 카드 중 편한 방법을 골라 주세요. 사진 원본은 인터넷에 올라가지 않아요.</p>
+              <button type="button" className="result-modal-close" onClick={() => setIsResultModalOpen(false)} aria-label="닫기">
+                ✕
+              </button>
+            </header>
+            <div className="result-cards">
+              {window.showDirectoryPicker && (
+                <button
+                  type="button"
+                  className="result-card primary"
+                  disabled={isFolderSaving}
+                  onClick={() => {
+                    setIsResultModalOpen(false)
+                    void exportToLocalFolder()
+                  }}
+                >
+                  <FolderInput size={32} />
+                  <strong>내 컴퓨터 폴더에 저장하기</strong>
+                  <p>사진을 행사·분류·사람별 폴더로 정리해서 직접 저장합니다. (Chrome / Edge 권장)</p>
+                </button>
+              )}
+              <button
+                type="button"
+                className="result-card"
+                disabled={isZipping}
+                onClick={() => {
+                  setIsResultModalOpen(false)
+                  void exportOrganizedZip()
+                }}
+              >
+                <Download size={32} />
+                <strong>ZIP 파일로 받기</strong>
+                <p>모든 기기에서 가능. 정리된 사진을 ZIP 파일로 다운로드해서 보관하세요.</p>
+              </button>
+              {GOOGLE_CLIENT_ID && (
+                <button
+                  type="button"
+                  className="result-card"
+                  disabled={isDriveSaving}
+                  onClick={() => {
+                    setIsResultModalOpen(false)
+                    void exportToGoogleDrive()
+                  }}
+                >
+                  <Upload size={32} />
+                  <strong>Google Drive에 올리기</strong>
+                  <p>구글 드라이브에 행사 폴더를 만들고 사진을 올립니다. 다른 교사와 공유하기 쉬워요.</p>
+                </button>
+              )}
+            </div>
+            <footer>
+              <p className="result-modal-extra">
+                <strong>정리표(엑셀용)만 따로 받기:</strong>
+                <button type="button" onClick={() => { exportPlan(); setIsResultModalOpen(false) }}>
+                  CSV
+                </button>
+                <button type="button" onClick={() => { exportPlanJson(); setIsResultModalOpen(false) }}>
+                  JSON
+                </button>
+              </p>
+            </footer>
+          </section>
+        </div>
+      )}
       {viewerPhoto && (
-        <div className="viewer-backdrop" role="dialog" aria-modal="true" aria-label={`${viewerPhoto.name} 확대 보기`}>
+        <div className="viewer-backdrop" role="dialog" aria-modal="true" aria-label={`${viewerPhoto.name} 확대 보기`} onClick={(event) => { if (event.target === event.currentTarget) closeViewer() }}>
           <section className="viewer">
             <header className="viewer-header">
               <div>
