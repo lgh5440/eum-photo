@@ -13,12 +13,9 @@ import {
   Search,
   ShieldCheck,
   Star,
-  Tags,
   Trash2,
   Upload,
   UserRoundPlus,
-  Users,
-  WandSparkles,
   XCircle,
 } from 'lucide-react'
 import './App.css'
@@ -323,12 +320,6 @@ const STATUS_FOLDER_LABELS: Record<PhotoStatus, string> = {
   featured: '대표사진',
   public_candidate: '공개후보',
   exclude: '제외검토',
-}
-const STATUS_KEYS: Record<PhotoStatus, string> = {
-  keep: '1',
-  featured: '2',
-  public_candidate: '3',
-  exclude: '4',
 }
 const STATUS_SHORTCUTS: Record<string, PhotoStatus> = {
   '1': 'keep',
@@ -675,7 +666,6 @@ function SingleModeStage({
 
 function App() {
   const [photos, setPhotos] = useState<PhotoItem[]>([])
-  const [studentInput, setStudentInput] = useState('')
   const [personNameInput, setPersonNameInput] = useState('')
   const [personFolders, setPersonFolders] = useState<PersonFolder[]>([])
   const [rosterNames, setRosterNames] = useState<string[]>([])
@@ -697,10 +687,8 @@ function App() {
   const [isDriveSaving, setIsDriveSaving] = useState(false)
   const [isPlanMenuOpen, setIsPlanMenuOpen] = useState(false)
   const planMenuRef = useRef<HTMLDivElement | null>(null)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isResultModalOpen, setIsResultModalOpen] = useState(false)
   const [isSingleMode, setIsSingleMode] = useState(false)
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [lastSaveResult, setLastSaveResult] = useState<SaveResult | null>(null)
   const [hideSorted, setHideSorted] = useState(true)
   const [undoSnapshot, setUndoSnapshot] = useState<{
@@ -709,7 +697,7 @@ function App() {
     label: string
   } | null>(null)
   const [isFaceScanning, setIsFaceScanning] = useState(false)
-  const [faceScanMessage, setFaceScanMessage] = useState('')
+  const [, setFaceScanMessage] = useState('')
   const [projectMessage, setProjectMessage] = useState('')
   const [archivedPlans, setArchivedPlans] = useState<ArchivedPlanSummary[]>(() => {
     if (typeof window === 'undefined') return []
@@ -785,22 +773,6 @@ function App() {
 
     return { entries, covered, uncovered, orphanTags, hasRoster: rosterNames.length > 0 }
   }, [personFolderById, photos, rosterNames])
-
-  const cumulativeStats = useMemo(() => {
-    const peopleCounts = new Map<string, number>()
-    const eventEntries = archivedPlans.map((plan) => {
-      Object.entries(plan.peopleCounts).forEach(([name, count]) => {
-        peopleCounts.set(name, (peopleCounts.get(name) ?? 0) + count)
-      })
-      return plan
-    })
-    const totalPhotos = archivedPlans.reduce((sum, plan) => sum + plan.photoCount, 0)
-    const ranking = [...peopleCounts.entries()]
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-
-    return { eventEntries, totalPhotos, ranking, eventCount: archivedPlans.length }
-  }, [archivedPlans])
 
   const photoConsentByPhotoId = useMemo(() => {
     const result = new Map<string, { yes: string[]; no: string[]; unknown: string[] }>()
@@ -1051,29 +1023,6 @@ function App() {
     setActivePhotoId(photos[nextIndex].id)
   }, [activeIndex, photos])
 
-  function applyTagsToSelected() {
-    const tags = studentInput
-      .split(',')
-      .map(normalizeTag)
-      .filter(Boolean)
-    const eventTag = normalizeTag(eventInput)
-
-    if (!selectedIds.length || (!tags.length && !eventTag)) return
-
-    captureSnapshot(`${selectedIds.length}장에 학생 이름 태그`)
-    setPhotos((current) =>
-      current.map((photo) => {
-        if (!selectedIds.includes(photo.id)) return photo
-
-        return {
-          ...photo,
-          eventTag: eventTag || photo.eventTag,
-          studentTags: [...new Set([...photo.studentTags, ...tags])],
-        }
-      }),
-    )
-  }
-
   async function importRoster(files: FileList | null) {
     const file = files?.[0]
     if (!file) return
@@ -1155,26 +1104,6 @@ function App() {
       ),
     )
     setPersonNameInput('')
-  }
-
-  function assignSelectedToPerson(folderId: string) {
-    if (!selectedIds.length) return
-    const folderName = personFolderById.get(folderId)?.name ?? '사람별 모음'
-    captureSnapshot(`${selectedIds.length}장을 「${folderName}」에 배정`)
-    setPersonFolders((current) =>
-      current.map((folder) =>
-        folder.id === folderId
-          ? { ...folder, photoIds: [...new Set([...folder.photoIds, ...selectedIds])] }
-          : folder,
-      ),
-    )
-    setPhotos((current) =>
-      current.map((photo) =>
-        selectedIds.includes(photo.id)
-          ? { ...photo, personFolderIds: [...new Set([...photo.personFolderIds, folderId])] }
-          : photo,
-      ),
-    )
   }
 
   function findSimilarCandidates(folderId: string) {
@@ -1287,6 +1216,7 @@ function App() {
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function scanPeoplePhotos() {
     if (!photos.length || isFaceScanning) return
 
@@ -2138,7 +2068,6 @@ function App() {
     }
   }
 
-  const selectedCount = selectedIds.length
   const visibleSelectedCount = visiblePhotos.filter((photo) => selectedIds.includes(photo.id)).length
 
   function selectVisiblePhotos() {
@@ -2265,328 +2194,22 @@ function App() {
   ])
 
   return (
-    <main className={`app-shell ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-      <button
-        type="button"
-        className="sidebar-toggle"
-        onClick={() => setIsSidebarOpen((value) => !value)}
-        aria-expanded={isSidebarOpen}
-        aria-label={isSidebarOpen ? '메뉴 닫기' : '메뉴 열기'}
-      >
-        <span aria-hidden="true">{isSidebarOpen ? '✕' : '☰'}</span>
-        <span className="sr-only">메뉴</span>
-      </button>
-      {isSidebarOpen && (
-        <button
-          type="button"
-          className="sidebar-backdrop"
-          onClick={() => setIsSidebarOpen(false)}
-          aria-label="메뉴 닫기"
-        />
-      )}
-      <aside className="sidebar">
-        <div className="brand">
-          <img src="/eum-logo.png" alt="" />
-          <div>
-            <strong>이음 포토</strong>
-            <span>사진은 내 컴퓨터에만</span>
-          </div>
-        </div>
-
-        <button className="primary-action" type="button" onClick={() => fileInputRef.current?.click()}>
-          <ImagePlus size={18} />
-          사진 추가
-        </button>
-        <input
-          ref={fileInputRef}
-          className="hidden-input"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(event) => void handleFiles(event.target.files)}
-        />
-
-        <section className="panel compact-panel">
-          <h2>1. 행사 / 학생 이름 적기</h2>
-          <label>
-            행사명
-            <input
-              value={eventInput}
-              onChange={(event) => setEventInput(event.target.value)}
-              placeholder="예: 봄 수련회, 여름성경학교"
-            />
-          </label>
-          {!normalizeTag(eventInput) && photos.length > 0 && (
-            <p className="event-empty-warning">
-              행사명을 비워두면 새로 추가된 사진은 「주일학교」로 저장됩니다.
-            </p>
-          )}
-          <label>
-            학생 이름 직접 입력
-            <input
-              value={studentInput}
-              onChange={(event) => setStudentInput(event.target.value)}
-              placeholder="예: 김하은, 박시온"
-            />
-          </label>
-          <button
-            className="secondary-action"
-            type="button"
-            onClick={applyTagsToSelected}
-            title="입력한 이름을 선택된 사진 모두에 태그로 추가합니다."
-          >
-            <Tags size={16} />
-            선택 {selectedCount}장에 적용
-          </button>
-          <input
-            ref={rosterInputRef}
-            className="hidden-input"
-            type="file"
-            accept=".csv,text/csv"
-            onChange={(event) => void importRoster(event.target.files)}
-          />
-          <button
-            className="secondary-action subtle-action"
-            type="button"
-            onClick={() => rosterInputRef.current?.click()}
-            title="이름 컬럼이 있는 CSV를 불러오면 이름 칩으로 빠르게 태그할 수 있어요. 「공개동의/초상권/consent」 컬럼이 있으면 동의 상태도 함께 표시됩니다."
-          >
-            <Upload size={16} />
-            학생 명단 CSV
-          </button>
-          {rosterMessage && <p className="scan-message">{rosterMessage}</p>}
-          {rosterMatch.hasRoster && (
-            <p className="roster-summary">
-              명단 {rosterMatch.entries.length}명 · 매칭 {rosterMatch.covered.length} · 미매칭 {rosterMatch.uncovered.length}
-              {rosterMatch.orphanTags.length > 0 && ` · 명단 외 ${rosterMatch.orphanTags.length}`}
-            </p>
-          )}
-          {rosterNames.length > 0 && (
-            <div className="roster-chip-list">
-              {rosterNames.map((name) => {
-                const count = rosterMatch.entries.find((entry) => entry.name === name)?.count ?? 0
-                const consent = rosterConsent[name]
-                const consentClass =
-                  consent === 'yes'
-                    ? 'consent-yes'
-                    : consent === 'no'
-                    ? 'consent-no'
-                    : consent === 'unknown'
-                    ? 'consent-unknown'
-                    : ''
-                const consentLabel =
-                  consent === 'yes' ? '단톡방 공유 OK' : consent === 'no' ? '단톡방 공유 안 됨' : consent === 'unknown' ? '동의 확인 필요' : ''
-                const baseTitle = count > 0 ? `${count}장 매칭됨` : '아직 매칭된 사진 없음'
-                return (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => applyRosterName(name)}
-                    className={`${count > 0 ? 'roster-chip-covered' : 'roster-chip-uncovered'} ${consentClass}`.trim()}
-                    title={consentLabel ? `${baseTitle} · ${consentLabel}` : baseTitle}
-                  >
-                    {consent === 'yes' && <span className="consent-mark">✓</span>}
-                    {consent === 'no' && <span className="consent-mark">✗</span>}
-                    {consent === 'unknown' && <span className="consent-mark">?</span>}
-                    {name}
-                    {count > 0 && <span className="roster-chip-count">{count}</span>}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-          {rosterMatch.orphanTags.length > 0 && (
-            <div className="roster-orphan">
-              <p>명단 외 태그</p>
-              <div className="roster-chip-list">
-                {rosterMatch.orphanTags.map((entry) => (
-                  <span key={entry.name} className="roster-chip-orphan" title="명단 CSV에 없는 이름">
-                    {entry.name}
-                    <span className="roster-chip-count">{entry.count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <section className="panel compact-panel">
-          <h2>📁 사람별 폴더</h2>
-          <label>
-            인물 이름
-            <input
-              value={personNameInput}
-              onChange={(event) => setPersonNameInput(event.target.value)}
-              placeholder="예: 김하은"
-            />
-          </label>
-          <button className="secondary-action" type="button" onClick={createPersonFolderFromActive}>
-            <UserRoundPlus size={16} />
-            현재 사진을 대표로 등록
-          </button>
-          <div className="person-folder-list">
-            {personFolders.map((folder) => (
-              <article key={folder.id} className="person-folder-card">
-                <button
-                  type="button"
-                  onClick={() => assignSelectedToPerson(folder.id)}
-                  title="선택된 사진을 이 폴더에 옮깁니다."
-                >
-                  <Users size={14} />
-                  <span>{folder.name}</span>
-                  <strong>{folder.photoIds.length}</strong>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => findSimilarCandidates(folder.id)}
-                  title="대표 사진과 비슷한 얼굴 자동 추천"
-                >
-                  <WandSparkles size={14} />
-                  <span>비슷한 얼굴 찾기</span>
-                  <strong>{folder.candidatePhotoIds.length}</strong>
-                </button>
-                <div className="person-folder-tools">
-                  <button type="button" onClick={() => renamePersonFolder(folder.id)} title="이름 변경">
-                    이름 변경
-                  </button>
-                  <button
-                    type="button"
-                    className="danger-link"
-                    onClick={() => deletePersonFolder(folder.id)}
-                    title="폴더 삭제 (사진 유지)"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </article>
-            ))}
-            {!personFolders.length && (
-              <p className="empty-hint">
-                ① 정리할 사람 사진 1장 클릭<br />
-                ② 위쪽에 이름 입력<br />
-                ③ 「현재 사진을 대표로 등록」<br />
-                ④ 「비슷한 얼굴 찾기」로 자동 추천
-              </p>
-            )}
-          </div>
-        </section>
-
-        <button
-          type="button"
-          className="advanced-toggle"
-          onClick={() => setIsAdvancedOpen((value) => !value)}
-          aria-expanded={isAdvancedOpen}
-        >
-          <span>⚙ 고급 기능</span>
-          <small>{isAdvancedOpen ? '접기' : '펼치기'}</small>
-        </button>
-        {isAdvancedOpen && (
-          <>
-        {typeof window !== 'undefined' && window.FaceDetector && (
-          <section className="panel compact-panel">
-            <h2>얼굴 자동으로 찾기</h2>
-            <p className="empty-hint">단체 사진과 인물 사진 자동 구분 (Chrome/Edge만 지원)</p>
-            <button className="secondary-action" type="button" onClick={() => void scanPeoplePhotos()} disabled={!photos.length || isFaceScanning}>
-              <Search size={16} />
-              {isFaceScanning ? '얼굴 찾는 중' : '얼굴 있는 사진 찾기'}
-            </button>
-            {faceScanMessage && <p className="scan-message">{faceScanMessage}</p>}
-          </section>
-        )}
-
-        <section className="panel compact-panel">
-          <h2>누적 통계</h2>
-          <p className="empty-hint">행사를 여러 번 진행하시는 분만. 학생별 누적 사진 수 비교용.</p>
-          <button
-            className="secondary-action"
-            type="button"
-            onClick={archiveCurrentPlan}
-            disabled={!photos.length}
-            title="이 컴퓨터 브라우저에만 저장됩니다. 학생별 사진 수가 행사를 거듭할수록 누적되어 등장 균형을 비교할 수 있어요."
-          >
-            <Archive size={16} />
-            이 행사 누적에 추가
-          </button>
-          {cumulativeStats.eventCount === 0 ? (
-            <p className="scan-message">정리가 끝난 행사를 추가하면 다음 행사에서 학생별 누적 사진 수를 비교할 수 있어요.</p>
-          ) : (
-            <>
-              <p className="cumulative-summary">
-                기록 {cumulativeStats.eventCount}건 · 누적 사진 {cumulativeStats.totalPhotos}장
-              </p>
-              <p className="cumulative-warning">
-                ※ 학생 이름이 이 컴퓨터 브라우저에만 저장됩니다. 공용 컴퓨터를 쓰셨다면 끝나고 「기록 비우기」를 눌러 주세요.
-              </p>
-              <div className="cumulative-archive">
-                {cumulativeStats.eventEntries.map((entry) => (
-                  <div key={entry.id} className="cumulative-event-row">
-                    <span>
-                      <strong>{entry.eventName}</strong>
-                      <small>
-                        {' '}
-                        · {entry.earliestDate} · {entry.photoCount}장
-                      </small>
-                    </span>
-                    <button type="button" onClick={() => removeArchivedPlan(entry.id)} title="이 기록 삭제">
-                      <XCircle size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {cumulativeStats.ranking.length > 0 && (
-                <div className="cumulative-ranking">
-                  {cumulativeStats.ranking.slice(0, 12).map((entry) => (
-                    <span key={entry.name}>
-                      {entry.name}
-                      <strong>{entry.count}</strong>
-                    </span>
-                  ))}
-                </div>
-              )}
-              <button className="secondary-action subtle-action" type="button" onClick={clearArchivedPlansWithConfirm}>
-                <Trash2 size={14} />
-                기록 비우기
-              </button>
-            </>
-          )}
-        </section>
-          </>
-        )}
-
-        <section className="panel compact-panel">
-          <h2>2. 선택한 사진 분류</h2>
-          <div className="status-actions">
-            {STATUS_OPTIONS.map((option) => {
-              const Icon = option.icon
-              const shortcut = STATUS_KEYS[option.value]
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    captureSnapshot(`${selectedIds.length}장 「${option.label}」로 분류`)
-                    setStatusForPhotos(selectedIds, option.value)
-                  }}
-                  disabled={!selectedCount}
-                  title={`${option.label} — ${option.description}`}
-                >
-                  <Icon size={15} />
-                  {option.label}
-                  <kbd className="shortcut-badge">{shortcut}</kbd>
-                </button>
-              )
-            })}
-          </div>
-        </section>
-
-        <section className="panel compact-panel">
-          <h2>로컬 원칙</h2>
-          <p>
-            지금 버전은 서버 업로드 없이 브라우저 메모리에서만 분석합니다. 새로고침하면 사진 목록은 사라집니다.
-          </p>
-        </section>
-      </aside>
+    <main className="app-shell">
+      <input
+        ref={fileInputRef}
+        className="hidden-input"
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={(event) => void handleFiles(event.target.files)}
+      />
+      <input
+        ref={rosterInputRef}
+        className="hidden-input"
+        type="file"
+        accept=".csv,text/csv"
+        onChange={(event) => void importRoster(event.target.files)}
+      />
 
       <section
         className="workspace"
@@ -2605,9 +2228,40 @@ function App() {
         }}
       >
         <header className="topbar">
-          <div>
-            <p className="eyebrow">E:UM Photo MVP</p>
-            <h1>교회학교 사진 정리 작업대</h1>
+          <div className="topbar-left">
+            <div className="brand-inline">
+              <img src="/eum-logo.png" alt="" />
+              <div>
+                <p className="eyebrow">E:UM Photo MVP</p>
+                <h1>교회학교 사진 정리 작업대</h1>
+              </div>
+            </div>
+            <div className="work-header">
+              <button className="primary-action" type="button" onClick={() => fileInputRef.current?.click()}>
+                <ImagePlus size={18} />
+                사진 추가
+              </button>
+              <label className="work-header-event">
+                <span>행사명</span>
+                <input
+                  value={eventInput}
+                  onChange={(event) => setEventInput(event.target.value)}
+                  placeholder="예: 봄 수련회"
+                />
+              </label>
+              <button
+                type="button"
+                className="work-header-roster"
+                onClick={() => rosterInputRef.current?.click()}
+                title="이름 컬럼이 있는 CSV. 「공개동의/초상권/consent」 컬럼도 인식."
+              >
+                <Upload size={14} />
+                학생 명단 CSV
+              </button>
+              {!normalizeTag(eventInput) && photos.length > 0 && (
+                <span className="work-header-warn">행사명 비우면 「주일학교」</span>
+              )}
+            </div>
           </div>
           <div className="top-actions">
             <input
@@ -3025,29 +2679,6 @@ function App() {
                           ) : null
                         })}
                       </div>
-                      <div className="quick-status" aria-label={`${photo.name} 선별 상태`}>
-                        {STATUS_OPTIONS.map((option) => {
-                          const Icon = option.icon
-                          const shortcut = STATUS_KEYS[option.value]
-
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              className={photo.status === option.value ? 'active' : ''}
-                              onClick={() => {
-                                captureSnapshot(`「${option.label}」로 분류`)
-                                setStatusForPhotos([photo.id], option.value)
-                              }}
-                              title={`${option.label} — ${option.description}`}
-                            >
-                              <Icon size={13} />
-                              <span>{option.shortLabel}</span>
-                              <kbd className="shortcut-badge">{shortcut}</kbd>
-                            </button>
-                          )
-                        })}
-                      </div>
                     </article>
                   )
                 })}
@@ -3058,61 +2689,106 @@ function App() {
             <section className="plan-panel">
               <div className="section-heading">
                 <h2>📂 폴더 트리</h2>
-                <span>{groups.length + personFolders.length}개</span>
+                <span>{personFolders.length}개</span>
+              </div>
+              <div className="plan-folder-create">
+                <input
+                  value={personNameInput}
+                  onChange={(event) => setPersonNameInput(event.target.value)}
+                  placeholder="새 사람 폴더 이름 (예: 김하은)"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      createPersonFolderFromActive()
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={createPersonFolderFromActive}
+                  disabled={!normalizeTag(personNameInput)}
+                  title="현재 활성 사진을 대표로 새 폴더 만들기"
+                >
+                  + 만들기
+                </button>
               </div>
               {(personFolders.length > 0 || photos.length > 0) && (
                 <div className="folder-tree">
                   {personFolders.length > 0 && (
                     <div className="folder-tree-section">
-                      <p className="folder-tree-label">👤 사람별 (사진을 끌어 놓으면 이동)</p>
+                      <p className="folder-tree-label">👤 사람별 (드래그로 이동)</p>
                       {personFolders.map((folder) => (
-                        <button
-                          key={folder.id}
-                          type="button"
-                          className="folder-tree-row droppable"
-                          onClick={() => {
-                            setSearchText(folder.name)
-                            setProjectMessage(`「${folder.name}」 사진만 보기`)
-                          }}
-                          onDragOver={(event) => {
-                            if (event.dataTransfer.types.includes('application/x-eum-photo-ids')) {
+                        <div key={folder.id} className="folder-tree-person">
+                          <button
+                            type="button"
+                            className="folder-tree-row droppable"
+                            onClick={() => {
+                              setSearchText(folder.name)
+                              setProjectMessage(`「${folder.name}」 사진만 보기`)
+                            }}
+                            onDragOver={(event) => {
+                              if (event.dataTransfer.types.includes('application/x-eum-photo-ids')) {
+                                event.preventDefault()
+                                event.dataTransfer.dropEffect = 'move'
+                                event.currentTarget.classList.add('drop-active')
+                              }
+                            }}
+                            onDragLeave={(event) => {
+                              event.currentTarget.classList.remove('drop-active')
+                            }}
+                            onDrop={(event) => {
+                              event.currentTarget.classList.remove('drop-active')
+                              const data = event.dataTransfer.getData('application/x-eum-photo-ids')
+                              if (!data) return
                               event.preventDefault()
-                              event.dataTransfer.dropEffect = 'move'
-                              event.currentTarget.classList.add('drop-active')
-                            }
-                          }}
-                          onDragLeave={(event) => {
-                            event.currentTarget.classList.remove('drop-active')
-                          }}
-                          onDrop={(event) => {
-                            event.currentTarget.classList.remove('drop-active')
-                            const data = event.dataTransfer.getData('application/x-eum-photo-ids')
-                            if (!data) return
-                            event.preventDefault()
-                            const ids = JSON.parse(data) as string[]
-                            captureSnapshot(`${ids.length}장을 「${folder.name}」 폴더로 이동`)
-                            setPersonFolders((current) =>
-                              current.map((f) =>
-                                f.id === folder.id
-                                  ? { ...f, photoIds: [...new Set([...f.photoIds, ...ids])] }
-                                  : f,
-                              ),
-                            )
-                            setPhotos((current) =>
-                              current.map((photo) =>
-                                ids.includes(photo.id)
-                                  ? { ...photo, personFolderIds: [...new Set([...photo.personFolderIds, folder.id])] }
-                                  : photo,
-                              ),
-                            )
-                            setProjectMessage(`${ids.length}장을 「${folder.name}」 폴더로 옮겼어요.`)
-                          }}
-                          title={`${folder.name} 사진만 보기 · 드래그로 이동`}
-                        >
-                          <span className="folder-tree-icon">📁</span>
-                          <span className="folder-tree-name">{folder.name}</span>
-                          <span className="folder-tree-count">{folder.photoIds.length}</span>
-                        </button>
+                              const ids = JSON.parse(data) as string[]
+                              captureSnapshot(`${ids.length}장을 「${folder.name}」 폴더로 이동`)
+                              setPersonFolders((current) =>
+                                current.map((f) =>
+                                  f.id === folder.id
+                                    ? { ...f, photoIds: [...new Set([...f.photoIds, ...ids])] }
+                                    : f,
+                                ),
+                              )
+                              setPhotos((current) =>
+                                current.map((photo) =>
+                                  ids.includes(photo.id)
+                                    ? { ...photo, personFolderIds: [...new Set([...photo.personFolderIds, folder.id])] }
+                                    : photo,
+                                ),
+                              )
+                              setProjectMessage(`${ids.length}장을 「${folder.name}」 폴더로 옮겼어요.`)
+                            }}
+                            title={`${folder.name} 사진만 보기 · 드래그로 이동`}
+                          >
+                            <span className="folder-tree-icon">📁</span>
+                            <span className="folder-tree-name">{folder.name}</span>
+                            <span className="folder-tree-count">{folder.photoIds.length}</span>
+                          </button>
+                          <div className="folder-tree-tools">
+                            <button
+                              type="button"
+                              onClick={() => findSimilarCandidates(folder.id)}
+                              title="대표 사진과 비슷한 얼굴 자동 추천"
+                            >
+                              ✨ 비슷한 얼굴
+                              {folder.candidatePhotoIds.length > 0 && (
+                                <strong>{folder.candidatePhotoIds.length}</strong>
+                              )}
+                            </button>
+                            <button type="button" onClick={() => renamePersonFolder(folder.id)} title="이름 변경">
+                              이름 변경
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-link"
+                              onClick={() => deletePersonFolder(folder.id)}
+                              title="폴더 삭제 (사진 유지)"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -3157,6 +2833,41 @@ function App() {
                           </span>
                           <span className="folder-tree-name">{option.label}</span>
                           <span className="folder-tree-count">{count}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {rosterNames.length > 0 && (
+                <div className="plan-roster">
+                  <strong>📋 학생 명단 ({rosterMatch.entries.length}명)</strong>
+                  {rosterMessage && <p className="plan-roster-msg">{rosterMessage}</p>}
+                  <div className="roster-chip-list">
+                    {rosterNames.map((name) => {
+                      const count = rosterMatch.entries.find((entry) => entry.name === name)?.count ?? 0
+                      const consent = rosterConsent[name]
+                      const consentClass =
+                        consent === 'yes'
+                          ? 'consent-yes'
+                          : consent === 'no'
+                          ? 'consent-no'
+                          : consent === 'unknown'
+                          ? 'consent-unknown'
+                          : ''
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => applyRosterName(name)}
+                          className={`${count > 0 ? 'roster-chip-covered' : 'roster-chip-uncovered'} ${consentClass}`.trim()}
+                          title={count > 0 ? `${count}장 매칭 · 클릭하면 사진만 보기` : '아직 매칭 없음'}
+                        >
+                          {consent === 'yes' && <span className="consent-mark">✓</span>}
+                          {consent === 'no' && <span className="consent-mark">✗</span>}
+                          {consent === 'unknown' && <span className="consent-mark">?</span>}
+                          {name}
+                          {count > 0 && <span className="roster-chip-count">{count}</span>}
                         </button>
                       )
                     })}
