@@ -1873,6 +1873,42 @@ h1 {
   color: #8a4d05;
 }
 
+.chips .chip-removable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.chip-remove {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  color: inherit;
+  border: 0;
+  font-size: 9px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.chip-remove:hover {
+  background: #ef4444;
+  color: #fff;
+  opacity: 1;
+}
+
+.photo-check.selected {
+  background: #34d399;
+  color: #064e3b;
+}
+
 .chips .warn-strong {
   background: #fee2e2;
   color: #991b1b;
@@ -1967,7 +2003,8 @@ h1 {
   font-size: 13px;
 }
 
-.person-summary span {
+.person-summary span,
+.person-summary button {
   padding: 4px 7px;
   border-radius: 999px;
   background: #fff;
@@ -1975,6 +2012,17 @@ h1 {
   border: 1px solid #dbe3ef;
   font-size: 11px;
   font-weight: 900;
+  cursor: default;
+}
+
+.person-summary button {
+  cursor: pointer;
+}
+
+.person-summary button:hover {
+  background: #f9d56f;
+  border-color: #f9d56f;
+  color: #172033;
 }
 
 .review-panel {

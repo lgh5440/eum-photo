@@ -1106,13 +1106,9 @@ function App() {
 
   function applyRosterName(name: string) {
     if (!selectedIds.length) {
-      setStudentInput((current) => {
-        const tags = current
-          .split(',')
-          .map(normalizeTag)
-          .filter(Boolean)
-        return [...new Set([...tags, name])].join(', ')
-      })
+      // 선택된 사진이 없으면 「이름으로 사진 보기」로 동작 — 검색에 이름 적용
+      setSearchText(name)
+      setProjectMessage(`「${name}」 이름으로 필터링했어요. 사진 카드를 클릭해서 선택한 뒤 명단 칩을 다시 누르면 일괄 태그됩니다.`)
       return
     }
 
@@ -1315,6 +1311,36 @@ function App() {
     } else {
       setProjectMessage('마지막 사진까지 분류했어요. 「결과 받기」를 누를 차례입니다.')
     }
+  }
+
+  function removeStudentTagFromPhoto(photoId: string, tag: string) {
+    captureSnapshot(`「${tag}」 태그 제거`)
+    setPhotos((current) =>
+      current.map((photo) =>
+        photo.id === photoId
+          ? { ...photo, studentTags: photo.studentTags.filter((existing) => existing !== tag) }
+          : photo,
+      ),
+    )
+  }
+
+  function removePersonFolderFromPhoto(photoId: string, folderId: string) {
+    const folderName = personFolderById.get(folderId)?.name ?? '사람별 모음'
+    captureSnapshot(`「${folderName}」 모음에서 빼기`)
+    setPhotos((current) =>
+      current.map((photo) =>
+        photo.id === photoId
+          ? { ...photo, personFolderIds: photo.personFolderIds.filter((id) => id !== folderId) }
+          : photo,
+      ),
+    )
+    setPersonFolders((current) =>
+      current.map((folder) =>
+        folder.id === folderId
+          ? { ...folder, photoIds: folder.photoIds.filter((id) => id !== photoId) }
+          : folder,
+      ),
+    )
   }
 
   function quickTagActive(name: string) {
@@ -2249,7 +2275,9 @@ function App() {
             </p>
           )}
           <p className="panel-hint">
-            학생 이름은 두 가지 방법 중 편한 쪽으로. 명단을 미리 불러오면 아래 이름 칩으로 한 번에 태그할 수 있어요.
+            학생 이름은 두 가지 방법 중 편한 쪽으로. 명단을 불러오면 아래 이름 칩 클릭으로:
+            <br />· <strong>사진 선택 없이</strong> 누르면 그 이름으로 사진 필터링
+            <br />· <strong>사진 선택 후</strong> 누르면 그 이름을 일괄 태그
           </p>
           <label>
             학생 이름 직접 입력
@@ -2353,6 +2381,14 @@ function App() {
           <>
         <section className="panel compact-panel">
           <h2>사람별 모음 (인물 폴더)</h2>
+          <p className="panel-hint">
+            「학생 태그」보다 더 정밀한 분류 방식이에요. 같은 사람의 사진을 한곳에 모으고 대표 사진 1장을 지정합니다.
+            <br /><strong>사용법</strong>:
+            <br />1. 사진을 클릭해 활성화한 뒤 아래 「현재 사진을 대표로 등록」
+            <br />2. 또는 사진 「확대」 → 얼굴 박스 클릭 → 이름 입력
+            <br />3. 「후보 찾기」 누르면 비슷한 사진 자동 추천
+            <br /><small>※ 학생 태그만으로 충분하면 이 기능은 안 써도 됩니다.</small>
+          </p>
           <label>
             인물 이름
             <input
@@ -2800,6 +2836,14 @@ function App() {
                   <button type="button" onClick={selectVisiblePhotos} disabled={!visiblePhotos.length}>
                     보이는 사진 선택
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIds([])}
+                    disabled={!selectedIds.length}
+                    title="선택된 사진을 모두 해제합니다."
+                  >
+                    선택 해제 ({selectedIds.length})
+                  </button>
                   <button type="button" onClick={clearFilters} disabled={!searchText && statusFilter === 'all' && faceFilter === 'all'}>
                     필터 해제
                   </button>
@@ -2852,10 +2896,12 @@ function App() {
                           setActivePhotoId(photo.id)
                           toggleSelected(photo.id)
                         }}
-                        title={selected ? '클릭하면 선택 해제됩니다.' : '여러 장을 선택해 일괄 태그·상태 변경할 수 있습니다.'}
+                        title={selected ? '✕ 클릭하면 선택 해제됩니다.' : '여러 장을 선택해 일괄 태그·상태 변경할 수 있습니다.'}
                       >
                         <img src={photo.url} alt={photo.name} />
-                        <span className="photo-check">{selected ? '✓ 선택됨' : '선택'}</span>
+                        <span className={selected ? 'photo-check selected' : 'photo-check'}>
+                          {selected ? '✓ 선택됨 (해제: 다시 클릭)' : '선택'}
+                        </span>
                       </button>
                       <button className="photo-zoom" type="button" onClick={() => openViewer(photo.id)}>
                         <Maximize2 size={14} />
@@ -2889,11 +2935,41 @@ function App() {
                         )}
                         {photo.faceScanStatus === 'unsupported' && <span className="muted">얼굴검출 미지원</span>}
                         {photo.studentTags.map((tag) => (
-                          <span key={tag}>{tag}</span>
+                          <span key={tag} className="chip-removable">
+                            {tag}
+                            <button
+                              type="button"
+                              className="chip-remove"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                removeStudentTagFromPhoto(photo.id, tag)
+                              }}
+                              title={`「${tag}」 태그 빼기`}
+                              aria-label={`${tag} 태그 빼기`}
+                            >
+                              ✕
+                            </button>
+                          </span>
                         ))}
                         {photo.personFolderIds.map((folderId) => {
                           const folder = personFolderById.get(folderId)
-                          return folder ? <span className="person" key={folderId}>{folder.name}</span> : null
+                          return folder ? (
+                            <span className="person chip-removable" key={folderId}>
+                              {folder.name}
+                              <button
+                                type="button"
+                                className="chip-remove"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  removePersonFolderFromPhoto(photo.id, folderId)
+                                }}
+                                title={`「${folder.name}」 모음에서 빼기`}
+                                aria-label={`${folder.name} 모음에서 빼기`}
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          ) : null
                         })}
                       </div>
                       <div className="quick-status" aria-label={`${photo.name} 선별 상태`}>
@@ -2935,9 +3011,17 @@ function App() {
                 <strong>인물 폴더</strong>
                 {personFolders.length ? (
                   personFolders.map((folder) => (
-                    <span key={folder.id}>
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => {
+                        setSearchText(folder.name)
+                        setProjectMessage(`「${folder.name}」 모음 사진만 보기로 필터링했어요.`)
+                      }}
+                      title={`「${folder.name}」 모음 사진만 보기`}
+                    >
                       {folder.name} {folder.photoIds.length}장
-                    </span>
+                    </button>
                   ))
                 ) : (
                   <span>아직 없음</span>
