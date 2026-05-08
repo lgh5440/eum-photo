@@ -2092,6 +2092,12 @@ function App() {
   }, [photos.length])
 
   useEffect(() => {
+    if (!projectMessage) return
+    const timer = window.setTimeout(() => setProjectMessage(''), 4000)
+    return () => window.clearTimeout(timer)
+  }, [projectMessage])
+
+  useEffect(() => {
     if (!isResultModalOpen) return
     const previouslyFocused = document.activeElement as HTMLElement | null
     const modal = document.querySelector<HTMLElement>('.result-modal')
@@ -2249,18 +2255,6 @@ function App() {
                   placeholder="예: 봄 수련회"
                 />
               </label>
-              <button
-                type="button"
-                className="work-header-roster"
-                onClick={() => rosterInputRef.current?.click()}
-                title="이름 컬럼이 있는 CSV. 「공개동의/초상권/consent」 컬럼도 인식."
-              >
-                <Upload size={14} />
-                학생 명단 CSV
-              </button>
-              {!normalizeTag(eventInput) && photos.length > 0 && (
-                <span className="work-header-warn">행사명 비우면 「주일학교」</span>
-              )}
             </div>
           </div>
           <div className="top-actions">
@@ -2282,43 +2276,12 @@ function App() {
                 방금 동작 취소
               </button>
             )}
-            <div className="top-actions-group" aria-label="이어 하기">
-              <button
-                type="button"
-                onClick={() => projectInputRef.current?.click()}
-                title="이전에 저장해둔 정리 진행 상황을 다시 불러옵니다."
-              >
-                <Upload size={16} />
-                이어 하기
-              </button>
-              <button
-                type="button"
-                onClick={exportProject}
-                disabled={!photos.length}
-                title="지금까지 정리한 내용(태그·분류·사람별 모음)을 작은 백업 파일로 저장해 둡니다. 사진 원본은 포함되지 않아요."
-              >
-                <Download size={16} />
-                중간 저장
-              </button>
-            </div>
-            <span className="top-actions-divider" aria-hidden="true" />
-            <button
-              type="button"
-              className="result-action"
-              onClick={() => setIsResultModalOpen(true)}
-              disabled={!photos.length}
-              title="정리 다 끝나셨어요? 사진을 어떻게 받을지 골라주세요."
-            >
-              <Download size={18} />
-              결과 받기
-            </button>
-            <span className="top-actions-divider" aria-hidden="true" />
             <button
               type="button"
               className="danger-action"
               onClick={clearAll}
               disabled={!photos.length}
-              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다. 저장하지 않은 작업은 먼저 「중간 저장」으로 백업하세요."
+              title="현재 화면의 모든 사진과 정리한 내용을 지웁니다."
             >
               <Trash2 size={16} />
               비우기
@@ -2328,7 +2291,15 @@ function App() {
 
         {projectMessage && (
           <div className="project-message" role="status">
-            {projectMessage}
+            <span>{projectMessage}</span>
+            <button
+              type="button"
+              onClick={() => setProjectMessage('')}
+              aria-label="메시지 닫기"
+              className="project-message-close"
+            >
+              ✕
+            </button>
           </div>
         )}
 
@@ -2394,27 +2365,16 @@ function App() {
         </ol>
 
         {photos.length > 0 && (
-          <section className="metrics-simple">
-            <div className="metrics-simple-line">
-              <Camera size={18} />
-              <strong>{photos.length}장</strong>
-              <span className="metrics-simple-sep">·</span>
-              <span>분류 완료</span>
-              <strong className="metrics-simple-progress">{sortedCount}</strong>
-              <span>/ {photos.length}장</span>
-              {(stats.duplicates + stats.blurry + reviewIssues.length) > 0 && (
-                <span className="metrics-simple-warn" title={`중복 ${stats.duplicates} · 흐림 ${stats.blurry} · 자동 검토 ${reviewIssues.length}`}>
-                  · 한 번 더 볼 사진 {stats.duplicates + stats.blurry + reviewIssues.length}
-                </span>
-              )}
-            </div>
-            <div className="metrics-simple-bar" aria-hidden="true">
-              <div
-                className="metrics-simple-bar-fill"
-                style={{ width: `${photos.length ? Math.round((sortedCount / photos.length) * 100) : 0}%` }}
-              />
-            </div>
-          </section>
+          <div
+            className="metrics-thin-bar"
+            aria-label={`${sortedCount}/${photos.length}장 분류됨`}
+            title={`전체 ${photos.length}장 · 분류 ${sortedCount}장`}
+          >
+            <div
+              className="metrics-thin-bar-fill"
+              style={{ width: `${Math.round((sortedCount / photos.length) * 100)}%` }}
+            />
+          </div>
         )}
 
         {!photos.length ? (
@@ -2687,6 +2647,16 @@ function App() {
             </section>
 
             <section className="plan-panel">
+              <button
+                type="button"
+                className="plan-result-action"
+                onClick={() => setIsResultModalOpen(true)}
+                disabled={!photos.length}
+                title="정리 다 끝나셨어요? 사진을 어떻게 받을지 골라주세요."
+              >
+                <Download size={18} />
+                결과 받기
+              </button>
               <div className="section-heading">
                 <h2>📂 폴더 트리</h2>
                 <span>{personFolders.length}개</span>
@@ -2893,6 +2863,21 @@ function App() {
                 ) : (
                   <p>현재 자동 검토 항목은 없습니다. 좋은 상태예요.</p>
                 )}
+              </div>
+              <div className="plan-tools">
+                <strong>⚙ 도구</strong>
+                <button type="button" onClick={() => rosterInputRef.current?.click()}>
+                  <Upload size={13} />
+                  학생 명단 CSV
+                </button>
+                <button type="button" onClick={() => projectInputRef.current?.click()}>
+                  <Upload size={13} />
+                  이어 하기
+                </button>
+                <button type="button" onClick={exportProject} disabled={!photos.length}>
+                  <Download size={13} />
+                  중간 저장
+                </button>
               </div>
               {personFolders.some((folder) => folder.candidatePhotoIds.length > 0) && (
                 <div className="candidate-panel">
