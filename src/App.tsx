@@ -702,6 +702,7 @@ function App() {
   const [isSingleMode, setIsSingleMode] = useState(false)
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
   const [lastSaveResult, setLastSaveResult] = useState<SaveResult | null>(null)
+  const [hideSorted, setHideSorted] = useState(true)
   const [undoSnapshot, setUndoSnapshot] = useState<{
     photos: PhotoItem[]
     personFolders: PersonFolder[]
@@ -907,6 +908,12 @@ function App() {
     const query = normalizeTag(searchText).toLowerCase()
 
     return photos.filter((photo) => {
+      // 「정리 안 된 사진만 보기」 토글: 분류·태그·인물폴더 셋 다 손 안 댄 사진만
+      if (hideSorted) {
+        const isSorted =
+          photo.status !== 'keep' || photo.studentTags.length > 0 || photo.personFolderIds.length > 0
+        if (isSorted) return false
+      }
       if (statusFilter !== 'all' && photo.status !== statusFilter) return false
       if (faceFilter === 'has_face' && (photo.faceCount ?? 0) <= 0) return false
       if (faceFilter === 'no_face' && photo.faceScanStatus !== 'done') return false
@@ -931,7 +938,7 @@ function App() {
 
       return haystack.includes(query)
     })
-  }, [faceFilter, personFolderById, photos, searchText, statusFilter])
+  }, [faceFilter, hideSorted, personFolderById, photos, searchText, statusFilter])
 
   const groups = useMemo(() => {
     const grouped = new Map<string, PhotoItem[]>()
@@ -1195,6 +1202,46 @@ function App() {
 
     setPersonFolders((current) =>
       current.map((item) => (item.id === folderId ? { ...item, candidatePhotoIds, candidateScores } : item)),
+    )
+  }
+
+  function approveAllCandidates(folderId: string) {
+    const folder = personFolderById.get(folderId)
+    if (!folder || !folder.candidatePhotoIds.length) return
+    captureSnapshot(`「${folder.name}」 후보 ${folder.candidatePhotoIds.length}장 모두 승인`)
+    const ids = folder.candidatePhotoIds
+    setPersonFolders((current) =>
+      current.map((entry) =>
+        entry.id === folderId
+          ? {
+              ...entry,
+              photoIds: [...new Set([...entry.photoIds, ...ids])],
+              candidatePhotoIds: [],
+              candidateScores: {},
+            }
+          : entry,
+      ),
+    )
+    setPhotos((current) =>
+      current.map((photo) =>
+        ids.includes(photo.id)
+          ? { ...photo, personFolderIds: [...new Set([...photo.personFolderIds, folderId])] }
+          : photo,
+      ),
+    )
+    setProjectMessage(`「${folder.name}」 폴더에 ${ids.length}장을 일괄 승인했어요.`)
+  }
+
+  function rejectAllCandidates(folderId: string) {
+    const folder = personFolderById.get(folderId)
+    if (!folder || !folder.candidatePhotoIds.length) return
+    captureSnapshot(`「${folder.name}」 후보 ${folder.candidatePhotoIds.length}장 모두 제외`)
+    setPersonFolders((current) =>
+      current.map((entry) =>
+        entry.id === folderId
+          ? { ...entry, candidatePhotoIds: [], candidateScores: {} }
+          : entry,
+      ),
     )
   }
 
@@ -2435,17 +2482,21 @@ function App() {
         </button>
         {isAdvancedOpen && (
           <>
-        <section className="panel compact-panel">
-          <h2>얼굴 자동으로 찾기</h2>
-          <button className="secondary-action" type="button" onClick={() => void scanPeoplePhotos()} disabled={!photos.length || isFaceScanning}>
-            <Search size={16} />
-            {isFaceScanning ? '얼굴 찾는 중' : '얼굴 있는 사진 찾기'}
-          </button>
-          {faceScanMessage && <p className="scan-message">{faceScanMessage}</p>}
-        </section>
+        {typeof window !== 'undefined' && window.FaceDetector && (
+          <section className="panel compact-panel">
+            <h2>얼굴 자동으로 찾기</h2>
+            <p className="empty-hint">단체 사진과 인물 사진 자동 구분 (Chrome/Edge만 지원)</p>
+            <button className="secondary-action" type="button" onClick={() => void scanPeoplePhotos()} disabled={!photos.length || isFaceScanning}>
+              <Search size={16} />
+              {isFaceScanning ? '얼굴 찾는 중' : '얼굴 있는 사진 찾기'}
+            </button>
+            {faceScanMessage && <p className="scan-message">{faceScanMessage}</p>}
+          </section>
+        )}
 
         <section className="panel compact-panel">
           <h2>누적 통계</h2>
+          <p className="empty-hint">행사를 여러 번 진행하시는 분만. 학생별 누적 사진 수 비교용.</p>
           <button
             className="secondary-action"
             type="button"
@@ -2821,6 +2872,14 @@ function App() {
                     <option value="no_face">얼굴 없음</option>
                     <option value="not_scanned">미검사</option>
                   </select>
+                  <button
+                    type="button"
+                    className={hideSorted ? 'filter-toggle active' : 'filter-toggle'}
+                    onClick={() => setHideSorted((value) => !value)}
+                    title={hideSorted ? '정리 끝난 사진도 모두 보기' : '정리 안 된 사진만 보기 (정리 끝난 건 자동 숨김)'}
+                  >
+                    {hideSorted ? '✓ 정리 안 됨만' : '☐ 정리 안 됨만'}
+                  </button>
                   <button type="button" onClick={selectVisiblePhotos} disabled={!visiblePhotos.length}>
                     보이는 사진 선택
                   </button>
@@ -3126,33 +3185,59 @@ function App() {
               </div>
               {personFolders.some((folder) => folder.candidatePhotoIds.length > 0) && (
                 <div className="candidate-panel">
-                  <strong>자동 후보</strong>
-                  {personFolders.map((folder) =>
-                    folder.candidatePhotoIds.map((candidateId) => {
-                      const candidate = photos.find((photo) => photo.id === candidateId)
-                      if (!candidate) return null
-
-                      return (
-                        <article key={`${folder.id}-${candidateId}`}>
-                          <button type="button" onClick={() => openViewer(candidate.id)}>
-                            <img src={candidate.url} alt={candidate.name} />
-                          </button>
-                          <div>
-                            <span>{folder.name} 후보 · 유사도 {folder.candidateScores[candidate.id] ?? 0}%</span>
-                            <p>{candidate.name}</p>
-                            <div>
-                              <button type="button" onClick={() => approveCandidate(folder.id, candidate.id)}>
-                                승인
-                              </button>
-                              <button type="button" onClick={() => rejectCandidate(folder.id, candidate.id)}>
-                                제외
-                              </button>
-                            </div>
+                  <strong>✨ 비슷한 얼굴 후보</strong>
+                  {personFolders
+                    .filter((folder) => folder.candidatePhotoIds.length > 0)
+                    .map((folder) => (
+                      <div key={folder.id} className="candidate-folder-block">
+                        <div className="candidate-folder-head">
+                          <span>
+                            <strong>{folder.name}</strong> · {folder.candidatePhotoIds.length}장 후보
+                          </span>
+                          <div className="candidate-bulk">
+                            <button
+                              type="button"
+                              className="candidate-bulk-approve"
+                              onClick={() => approveAllCandidates(folder.id)}
+                              title={`「${folder.name}」 후보 ${folder.candidatePhotoIds.length}장 모두 승인`}
+                            >
+                              ✓ 모두 승인
+                            </button>
+                            <button
+                              type="button"
+                              className="candidate-bulk-reject"
+                              onClick={() => rejectAllCandidates(folder.id)}
+                              title={`「${folder.name}」 후보 ${folder.candidatePhotoIds.length}장 모두 제외`}
+                            >
+                              ✕ 모두 제외
+                            </button>
                           </div>
-                        </article>
-                      )
-                    }),
-                  )}
+                        </div>
+                        {folder.candidatePhotoIds.map((candidateId) => {
+                          const candidate = photos.find((photo) => photo.id === candidateId)
+                          if (!candidate) return null
+                          return (
+                            <article key={`${folder.id}-${candidateId}`}>
+                              <button type="button" onClick={() => openViewer(candidate.id)}>
+                                <img src={candidate.url} alt={candidate.name} />
+                              </button>
+                              <div>
+                                <span>유사도 {folder.candidateScores[candidate.id] ?? 0}%</span>
+                                <p>{candidate.name}</p>
+                                <div>
+                                  <button type="button" onClick={() => approveCandidate(folder.id, candidate.id)}>
+                                    승인
+                                  </button>
+                                  <button type="button" onClick={() => rejectCandidate(folder.id, candidate.id)}>
+                                    제외
+                                  </button>
+                                </div>
+                              </div>
+                            </article>
+                          )
+                        })}
+                      </div>
+                    ))}
                 </div>
               )}
               <div className="folder-list">
