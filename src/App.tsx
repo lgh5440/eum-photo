@@ -1779,15 +1779,23 @@ function App() {
               행사명을 비워두면 새로 추가된 사진은 「주일학교」로 저장됩니다.
             </p>
           )}
+          <p className="panel-hint">
+            학생 이름은 두 가지 방법 중 편한 쪽으로. 명단을 미리 불러오면 아래 이름 칩으로 한 번에 태그할 수 있어요.
+          </p>
           <label>
-            학생명 태그
+            학생 이름 직접 입력
             <input
               value={studentInput}
               onChange={(event) => setStudentInput(event.target.value)}
               placeholder="예: 김하은, 박시온"
             />
           </label>
-          <button className="secondary-action" type="button" onClick={applyTagsToSelected}>
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={applyTagsToSelected}
+            title="입력한 이름을 선택된 사진 모두에 태그로 추가합니다."
+          >
             <Tags size={16} />
             선택 {selectedCount}장에 적용
           </button>
@@ -1964,24 +1972,6 @@ function App() {
         </section>
 
         <section className="panel compact-panel">
-          <h2>빠른 선별</h2>
-          <div className="shortcut-grid">
-            <span>←/→</span>
-            <strong>사진 이동</strong>
-            <span>Space</span>
-            <strong>선택</strong>
-            <span>1</span>
-            <strong>보관</strong>
-            <span>2</span>
-            <strong>대표</strong>
-            <span>3</span>
-            <strong>공개후보</strong>
-            <span>4</span>
-            <strong>제외</strong>
-          </div>
-        </section>
-
-        <section className="panel compact-panel">
           <h2>선택 사진 상태 변경</h2>
           <p className="panel-hint">사진을 먼저 선택한 뒤 상태를 일괄 적용합니다. 키보드 단축키 1·2·3·4도 같은 동작.</p>
           <div className="status-actions">
@@ -2014,7 +2004,22 @@ function App() {
         </section>
       </aside>
 
-      <section className="workspace">
+      <section
+        className="workspace"
+        onDragOver={(event) => {
+          if (!photos.length) return
+          if (event.dataTransfer.types.includes('Files')) {
+            event.preventDefault()
+            event.dataTransfer.dropEffect = 'copy'
+          }
+        }}
+        onDrop={(event) => {
+          if (!photos.length) return
+          if (!event.dataTransfer.files.length) return
+          event.preventDefault()
+          void handleFiles(event.dataTransfer.files)
+        }}
+      >
         <header className="topbar">
           <div>
             <p className="eyebrow">E:UM Photo MVP</p>
@@ -2236,7 +2241,7 @@ function App() {
                   <p>
                     {activePhoto
                       ? `${activeIndex + 1}/${photos.length} · ${activePhoto.name}`
-                      : '빠른 선별 대기'}
+                      : '사진을 클릭해 활성화하면 단축키로 빠르게 분류할 수 있어요.'}
                   </p>
                 </div>
                 <div className="heading-actions">
@@ -2400,14 +2405,22 @@ function App() {
               <div className="review-panel">
                 <strong>검토 필요</strong>
                 {reviewIssues.length ? (
-                  reviewIssues.map((issue) => (
-                    <button key={issue.id} type="button" onClick={() => openViewer(issue.photo.id)}>
-                      <span>{issue.label}</span>
-                      <p>{issue.photo.name}</p>
-                    </button>
-                  ))
+                  <>
+                    <p className="panel-hint">항목을 누르면 해당 사진이 확대 보기로 열립니다.</p>
+                    {reviewIssues.map((issue) => (
+                      <button
+                        key={issue.id}
+                        type="button"
+                        onClick={() => openViewer(issue.photo.id)}
+                        title={`${issue.label} — 클릭하면 ${issue.photo.name}이(가) 확대 보기로 열립니다.`}
+                      >
+                        <span>{issue.label}</span>
+                        <p>{issue.photo.name} <em>확대해서 확인 →</em></p>
+                      </button>
+                    ))}
+                  </>
                 ) : (
-                  <p>현재 자동 검토 항목은 없습니다.</p>
+                  <p>현재 자동 검토 항목은 없습니다. 좋은 상태예요.</p>
                 )}
               </div>
               {personFolders.some((folder) => folder.candidatePhotoIds.length > 0) && (

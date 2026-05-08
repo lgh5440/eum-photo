@@ -1169,6 +1169,19 @@ h1 {
   white-space: nowrap;
 }
 
+.review-panel button:hover {
+  background: #fff8eb;
+  border-color: #fcd34d;
+}
+
+.review-panel button p em {
+  margin-left: 6px;
+  color: #9a3412;
+  font-style: normal;
+  font-weight: 900;
+  font-size: 11px;
+}
+
 .candidate-panel {
   margin: 12px 12px 0;
   padding: 12px;
