@@ -2663,7 +2663,7 @@ function App() {
                     onClick={() => setIsSingleMode((value) => !value)}
                     title={isSingleMode ? '여러 사진을 한 번에 보는 화면으로 돌아갑니다.' : '한 장씩 큰 화면에서 빠르게 분류합니다.'}
                   >
-                    {isSingleMode ? '목록으로 돌아가기' : '한 장씩 빠르게 분류'}
+                    {isSingleMode ? '목록 보기' : '한 장씩 분류'}
                   </button>
                   <button type="button" onClick={() => moveActivePhoto(-1)} disabled={activeIndex <= 0}>
                     <ArrowLeft size={15} />
