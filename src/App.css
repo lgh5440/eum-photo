@@ -542,6 +542,69 @@ h1 {
   background: #f9d56f;
 }
 
+.dropzone-steps {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  max-width: 520px;
+  width: 100%;
+}
+
+.dropzone-steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f4f7fb;
+  border: 1px solid #e4e9f1;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.dropzone-steps li strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f9d56f;
+  color: #172033;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.event-empty-warning {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.18);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  color: #fca5a5;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dropzone-warning {
+  max-width: 520px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
@@ -790,6 +853,13 @@ h1 {
 .chips .warn {
   background: #fff0d6;
   color: #8a4d05;
+}
+
+.chips .warn-strong {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  font-weight: 900;
 }
 
 .chips .person {

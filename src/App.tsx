@@ -531,7 +531,7 @@ function App() {
   const [rosterNames, setRosterNames] = useState<string[]>([])
   const [rosterConsent, setRosterConsent] = useState<Record<string, ConsentState>>({})
   const [rosterMessage, setRosterMessage] = useState('')
-  const [eventInput, setEventInput] = useState('주일학교')
+  const [eventInput, setEventInput] = useState('')
   const [searchText, setSearchText] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [faceFilter, setFaceFilter] = useState<FaceFilter>('all')
@@ -1083,12 +1083,22 @@ function App() {
   }
 
   function clearAll() {
+    if (!photos.length) return
+    const message = `사진 ${photos.length}장과 인물 폴더, 선별 상태가 모두 사라집니다. 계속할까요?\n\n저장하지 않은 작업은 「작업 저장」을 먼저 누르세요.`
+    if (!window.confirm(message)) return
+
     photos.forEach((photo) => URL.revokeObjectURL(photo.url))
     setPhotos([])
     setPersonFolders([])
     setSelectedIds([])
     setActivePhotoId(null)
     closeViewer()
+  }
+
+  function clearArchivedPlansWithConfirm() {
+    if (!archivedPlans.length) return
+    if (!window.confirm(`누적 통계 기록 ${archivedPlans.length}건이 모두 사라집니다. 계속할까요?`)) return
+    clearArchivedPlans()
   }
 
   function buildPlanRows() {
@@ -1720,8 +1730,17 @@ function App() {
           <h2>정리 기준</h2>
           <label>
             행사명
-            <input value={eventInput} onChange={(event) => setEventInput(event.target.value)} />
+            <input
+              value={eventInput}
+              onChange={(event) => setEventInput(event.target.value)}
+              placeholder="예: 봄 수련회, 여름성경학교"
+            />
           </label>
+          {!normalizeTag(eventInput) && photos.length > 0 && (
+            <p className="event-empty-warning">
+              행사명을 비워두면 새로 추가된 사진은 「주일학교」로 저장됩니다.
+            </p>
+          )}
           <label>
             학생명 태그
             <input
@@ -1882,7 +1901,7 @@ function App() {
                   ))}
                 </div>
               )}
-              <button className="secondary-action subtle-action" type="button" onClick={clearArchivedPlans}>
+              <button className="secondary-action subtle-action" type="button" onClick={clearArchivedPlansWithConfirm}>
                 <Trash2 size={14} />
                 기록 비우기
               </button>
@@ -2052,12 +2071,33 @@ function App() {
             }}
           >
             <ShieldCheck size={40} />
-            <h2>사진을 이곳에 끌어오세요</h2>
-            <p>JPG, PNG, WebP 사진을 로컬에서 분석합니다. 업로드 서버는 사용하지 않습니다.</p>
+            <h2>사진을 이곳에 끌어오거나 선택하세요</h2>
+            <p>JPG, PNG, WebP 사진을 사용자 컴퓨터 안에서만 분석합니다. 서버 업로드는 없습니다.</p>
             <button type="button" onClick={() => fileInputRef.current?.click()}>
               <ImagePlus size={18} />
               사진 선택
             </button>
+            <ol className="dropzone-steps" aria-label="작업 순서">
+              <li>
+                <strong>1</strong>
+                <span>사진을 끌어오거나 선택해서 추가하세요.</span>
+              </li>
+              <li>
+                <strong>2</strong>
+                <span>왼쪽 사이드바에 행사명을 적습니다 (예: 봄 수련회).</span>
+              </li>
+              <li>
+                <strong>3</strong>
+                <span>선택 사항: 학생 명단 CSV를 불러오면 이름 버튼으로 빠르게 태그할 수 있어요.</span>
+              </li>
+              <li>
+                <strong>4</strong>
+                <span>정리가 끝나면 「로컬 폴더 저장」이나 「정리본 ZIP」으로 내보냅니다.</span>
+              </li>
+            </ol>
+            <p className="dropzone-warning">
+              새로고침하면 사진 목록이 사라집니다. 도중에 멈출 때는 상단의 「작업 저장」을 눌러 백업해 두세요.
+            </p>
           </section>
         ) : (
           <div className="content-grid">
@@ -2121,6 +2161,9 @@ function App() {
                   const selected = selectedIds.includes(photo.id)
                   const duplicate = duplicateHashes.has(photo.hash)
                   const blurry = photo.blurScore < BLUR_THRESHOLD
+                  const consent = photoConsentByPhotoId.get(photo.id)
+                  const consentDenied = consent && consent.no.length > 0
+                  const consentUnknown = consent && !consent.no.length && consent.unknown.length > 0 && !consent.yes.length
 
                   return (
                     <article
@@ -2152,6 +2195,16 @@ function App() {
                       </div>
                       <div className="chips">
                         <span className={`status ${photo.status}`}>{STATUS_LABELS.get(photo.status)}</span>
+                        {consentDenied && (
+                          <span className="warn-strong" title={`공개 미동의: ${consent.no.join(', ')}`}>
+                            공개 미동의: {consent.no.join(', ')}
+                          </span>
+                        )}
+                        {consentUnknown && (
+                          <span className="warn" title={`동의 미확인: ${consent.unknown.join(', ')}`}>
+                            동의 미확인
+                          </span>
+                        )}
                         {duplicate && <span className="warn">중복 후보</span>}
                         {blurry && <span className="warn">흐림</span>}
                         {photo.faceScanStatus === 'done' && (photo.faceCount ?? 0) > 0 && (
