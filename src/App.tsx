@@ -96,6 +96,15 @@ type ProjectSaveFile = {
   personFolders: SavedPersonFolder[]
 }
 
+type SaveResult = {
+  method: 'folder' | 'zip' | 'drive'
+  rootName: string
+  totalPhotos: number
+  folderCounts: Record<string, number>
+  locationHint: string
+  savedAt: number
+}
+
 type ArchivedPlanSummary = {
   id: string
   savedAt: string
@@ -692,6 +701,7 @@ function App() {
   const [isResultModalOpen, setIsResultModalOpen] = useState(false)
   const [isSingleMode, setIsSingleMode] = useState(false)
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
+  const [lastSaveResult, setLastSaveResult] = useState<SaveResult | null>(null)
   const [undoSnapshot, setUndoSnapshot] = useState<{
     photos: PhotoItem[]
     personFolders: PersonFolder[]
@@ -1795,6 +1805,8 @@ function App() {
     if (!photos.length || isZipping) return
 
     setIsZipping(true)
+    const folderCounts: Record<string, number> = {}
+    let savedTotal = 0
     try {
       const zip = new JSZip()
       const usedPaths = new Map<string, number>()
@@ -1834,12 +1846,23 @@ function App() {
               : rawPath
 
             zip.file(finalPath, fileBuffer)
+            const relativeFolder = `${safePathSegment(statusFolder)}/${personSegment}`
+            folderCounts[relativeFolder] = (folderCounts[relativeFolder] ?? 0) + 1
+            savedTotal += 1
           })
         }),
       )
 
       const blob = await zip.generateAsync({ type: 'blob' })
       downloadBlob(`eum-photo-${eventSegment}.zip`, blob)
+      setLastSaveResult({
+        method: 'zip',
+        rootName: `eum-photo-${eventSegment}.zip`,
+        totalPhotos: savedTotal,
+        folderCounts,
+        locationHint: '브라우저 다운로드 폴더',
+        savedAt: Date.now(),
+      })
       setProjectMessage(`ZIP 파일 ${photos.length}장을 받았습니다. 다운로드 폴더를 확인해 주세요.`)
     } catch (error) {
       const reason = error instanceof Error ? error.message : '알 수 없음'
@@ -1858,6 +1881,8 @@ function App() {
     }
 
     setIsFolderSaving(true)
+    const folderCounts: Record<string, number> = {}
+    let savedTotal = 0
     try {
       const root = await window.showDirectoryPicker({ mode: 'readwrite' })
       const eventSegment = safePathSegment(`${photos[0]?.dateKey ?? getDateKey(new Date())}_${eventInput}`)
@@ -1899,9 +1924,19 @@ function App() {
           const targetDirectory = await getOrCreateDirectory(eventDirectory, [safePathSegment(statusFolder), personSegment])
 
           await writeFileToDirectory(targetDirectory, finalName, fileBuffer)
+          folderCounts[folderPath] = (folderCounts[folderPath] ?? 0) + 1
+          savedTotal += 1
         }
       }
 
+      setLastSaveResult({
+        method: 'folder',
+        rootName: eventSegment,
+        totalPhotos: savedTotal,
+        folderCounts,
+        locationHint: `선택하신 폴더 안 「${eventSegment}」`,
+        savedAt: Date.now(),
+      })
       setProjectMessage(`${eventSegment} 폴더에 정리된 사진과 정리안 CSV/JSON을 저장했습니다.`)
     } catch (error) {
       const name = error instanceof DOMException ? error.name : ''
@@ -1928,6 +1963,8 @@ function App() {
     }
 
     setIsDriveSaving(true)
+    const folderCounts: Record<string, number> = {}
+    let savedTotal = 0
     try {
       const token = await requestGoogleAccessToken(GOOGLE_CLIENT_ID)
       const eventSegment = safePathSegment(`${photos[0]?.dateKey ?? getDateKey(new Date())}_${eventInput}`)
@@ -1997,9 +2034,19 @@ function App() {
             photo.file.type || 'image/jpeg',
             photo.file,
           )
+          folderCounts[personKey] = (folderCounts[personKey] ?? 0) + 1
+          savedTotal += 1
         }
       }
 
+      setLastSaveResult({
+        method: 'drive',
+        rootName: `eum-photo_${eventSegment}`,
+        totalPhotos: savedTotal,
+        folderCounts,
+        locationHint: 'Google Drive 내 「내 드라이브」',
+        savedAt: Date.now(),
+      })
       setProjectMessage(`Google Drive 'eum-photo_${eventSegment}' 폴더에 ${photos.length}장과 정리안을 업로드했습니다.`)
     } catch (error) {
       const message = error instanceof Error ? error.message : '알 수 없는 오류'
@@ -2554,6 +2601,53 @@ function App() {
           <div className="project-message" role="status">
             {projectMessage}
           </div>
+        )}
+
+        {lastSaveResult && (
+          <section className="save-result-panel" role="status" aria-live="polite">
+            <div className="save-result-head">
+              <div>
+                <h2>
+                  ✓ 저장 완료 — {lastSaveResult.totalPhotos}장
+                </h2>
+                <p>
+                  <strong>{lastSaveResult.rootName}</strong> · {lastSaveResult.locationHint}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLastSaveResult(null)}
+                className="save-result-close"
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="save-result-body">
+              <p className="save-result-hint">
+                {lastSaveResult.method === 'folder'
+                  ? '선택하신 폴더 안에 「행사 → 분류 상태 → 사람」 구조로 저장됐어요. 탐색기로 열어 확인하세요.'
+                  : lastSaveResult.method === 'zip'
+                  ? '브라우저 다운로드 폴더에 ZIP 파일이 생겼어요. 압축을 풀면 같은 구조로 정리됩니다.'
+                  : 'Google Drive에 행사 폴더가 만들어졌어요. drive.google.com 에서 확인하세요.'}
+              </p>
+              <div className="save-result-folders">
+                {Object.entries(lastSaveResult.folderCounts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([folder, count]) => (
+                    <div key={folder} className="save-result-folder-row">
+                      <span className="save-result-folder-name">{folder.replace(/\//g, ' › ')}</span>
+                      <strong className="save-result-folder-count">{count}장</strong>
+                    </div>
+                  ))}
+              </div>
+              {lastSaveResult.method === 'zip' && (
+                <p className="save-result-tip">
+                  💡 압축 풀어 둘 위치를 정해두면 다음 행사부터는 「내 컴퓨터 폴더에 저장하기」가 더 편해요 (Chrome / Edge).
+                </p>
+              )}
+            </div>
+          </section>
         )}
 
         <ol className="workflow-stepper" aria-label="작업 진행 상황">
