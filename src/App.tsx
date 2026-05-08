@@ -1661,6 +1661,16 @@ function App() {
   }
 
   useEffect(() => {
+    if (!photos.length) return
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [photos.length])
+
+  useEffect(() => {
     if (!isPlanMenuOpen) return
     function handleClickOutside(event: MouseEvent) {
       if (planMenuRef.current && !planMenuRef.current.contains(event.target as Node)) {
@@ -2485,7 +2495,15 @@ function App() {
                 </span>
               </div>
               <div className="viewer-actions">
-                <button type="button" onClick={() => moveViewerPhoto(-1)} disabled={viewerIndex <= 0}>
+                <span className="viewer-hint" title="ESC 닫기 · ←→ 사진 이동 · 1·2·3·4 상태 변경">
+                  ESC ← → 1234
+                </span>
+                <button
+                  type="button"
+                  onClick={() => moveViewerPhoto(-1)}
+                  disabled={viewerIndex <= 0}
+                  title="이전 사진 (←)"
+                >
                   <ArrowLeft size={16} />
                 </button>
                 {[1, 1.5, 2.5].map((zoom) => (
@@ -2494,6 +2512,7 @@ function App() {
                     type="button"
                     className={viewerZoom === zoom ? 'active' : ''}
                     onClick={() => setViewerZoom(zoom)}
+                    title={`확대 ${zoom}배`}
                   >
                     {zoom}x
                   </button>
@@ -2502,10 +2521,11 @@ function App() {
                   type="button"
                   onClick={() => moveViewerPhoto(1)}
                   disabled={viewerIndex < 0 || viewerIndex >= photos.length - 1}
+                  title="다음 사진 (→)"
                 >
                   <ArrowRight size={16} />
                 </button>
-                <button type="button" onClick={closeViewer}>
+                <button type="button" className="viewer-close" onClick={closeViewer} title="닫기 (ESC)">
                   닫기
                 </button>
               </div>
