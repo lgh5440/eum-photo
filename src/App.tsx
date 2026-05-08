@@ -2562,6 +2562,29 @@ function App() {
             </section>
 
             <section className="plan-panel">
+              <div className="plan-top-actions">
+                <button
+                  type="button"
+                  className="plan-back-action"
+                  onClick={() => {
+                    setSearchText('')
+                    setStatusFilter('all')
+                    setFaceFilter('all')
+                    setIsSingleMode(false)
+                    setSelectedIds([])
+                  }}
+                  disabled={
+                    !searchText &&
+                    statusFilter === 'all' &&
+                    faceFilter === 'all' &&
+                    !isSingleMode &&
+                    selectedIds.length === 0
+                  }
+                  title="모든 필터·선택·확대를 해제하고 전체 사진 화면으로 돌아갑니다."
+                >
+                  ← 작업 화면
+                </button>
+              </div>
               <button
                 type="button"
                 className="plan-result-action"
@@ -2679,7 +2702,7 @@ function App() {
                   )}
                   <div className="folder-tree-section">
                     <p className="folder-tree-label">🏷 분류별 (드래그로 분류 변경)</p>
-                    {STATUS_OPTIONS.map((option) => {
+                    {STATUS_OPTIONS.filter((option) => option.value !== 'keep').map((option) => {
                       const count = photos.filter((photo) => photo.status === option.value).length
                       if (!count) return null
                       return (
@@ -2759,51 +2782,6 @@ function App() {
                   </div>
                 </div>
               )}
-              <div className="review-panel">
-                <strong>⚠ 검토 필요</strong>
-                {reviewIssues.length ? (
-                  <>
-                    {reviewIssues.map((issue) => (
-                      <button
-                        key={issue.id}
-                        type="button"
-                        onClick={() => openViewer(issue.photo.id)}
-                        title={`${issue.label} — 클릭하면 ${issue.photo.name}이(가) 확대 보기로 열립니다.`}
-                      >
-                        <span>{issue.label}</span>
-                        <p>{issue.photo.name} <em>확대해서 확인 →</em></p>
-                      </button>
-                    ))}
-                  </>
-                ) : (
-                  <p>현재 자동 검토 항목은 없습니다. 좋은 상태예요.</p>
-                )}
-              </div>
-              <div className="plan-tools">
-                <strong>⚙ 도구</strong>
-                <label className="plan-tools-event">
-                  <span>행사명</span>
-                  <input
-                    value={eventInput}
-                    onChange={(event) => setEventInput(event.target.value)}
-                    placeholder="예: 봄 수련회"
-                  />
-                </label>
-                <div className="plan-tools-row">
-                  <button type="button" onClick={() => rosterInputRef.current?.click()}>
-                    <Upload size={13} />
-                    학생 명단 CSV
-                  </button>
-                  <button type="button" onClick={() => projectInputRef.current?.click()}>
-                    <Upload size={13} />
-                    이어 하기
-                  </button>
-                  <button type="button" onClick={exportProject} disabled={!photos.length}>
-                    <Download size={13} />
-                    중간 저장
-                  </button>
-                </div>
-              </div>
               {personFolders.some((folder) => folder.candidatePhotoIds.length > 0) && (
                 <div className="candidate-panel">
                   <strong>✨ 비슷한 얼굴 후보</strong>
