@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Electron 빌드 산출물 (인스톨러 .exe 등 — 무거운 바이너리)
+release
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
