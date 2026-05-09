@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "electron/main.mjs",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron": "wait-on http://localhost:5173 && cross-env ELECTRON_RUN_AS_NODE= NODE_ENV=development electron .",
+    "electron": "wait-on http://localhost:5173 && node electron/run-dev.cjs",
     "dev:electron": "concurrently -k -n vite,electron -c blue,magenta \"npm:dev\" \"npm:electron\"",
     "build:electron": "npm run build && cross-env ELECTRON_RUN_AS_NODE= electron-builder",
     "pack:electron": "npm run build && cross-env ELECTRON_RUN_AS_NODE= electron-builder --dir"

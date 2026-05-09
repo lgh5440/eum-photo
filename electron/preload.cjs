@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld('eum', {
     emptyDir: (path) => ipcRenderer.invoke('eum:fs:emptyDir', path),
     exists: (path) => ipcRenderer.invoke('eum:fs:exists', path),
     stat: (path) => ipcRenderer.invoke('eum:fs:stat', path),
+    rename: (oldPath, newPath) => ipcRenderer.invoke('eum:fs:rename', oldPath, newPath),
+    copyFile: (srcPath, destPath) => ipcRenderer.invoke('eum:fs:copyFile', srcPath, destPath),
     watch: async (path, options, onEvent) => {
       const result = await ipcRenderer.invoke('eum:fs:watch', path, options)
       if (result.ok && result.watchId) {
