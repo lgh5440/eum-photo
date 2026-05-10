@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import eumLogo from './assets/eum-logo.png'
+import css from './NewProjectView.module.css'
 import {
   addPhotos,
   createPersonFolder,
@@ -1083,18 +1084,18 @@ export default function NewProjectView() {
 
   if (screen === 'no-folder') {
     return (
-      <div style={styles.fullScreen}>
-        <div style={styles.welcomeCard}>
-          <img src={eumLogo} alt="E:UM" style={styles.welcomeLogo} />
-          <h1 style={styles.welcomeTitle}>E:UM Photo</h1>
-          <p style={styles.welcomeText}>
+      <div className={css.fullScreen}>
+        <div className={css.welcomeCard}>
+          <img src={eumLogo} alt="E:UM" className={css.welcomeLogo} />
+          <h1 className={css.welcomeTitle}>E:UM Photo</h1>
+          <p className={css.welcomeText}>
             행사 사진을 학생별로 정리하는 데스크탑 도구예요.
           </p>
-          <p style={styles.welcomeHint}>
+          <p className={css.welcomeHint}>
             먼저 사진을 모을 작업 폴더를 한 번 정해 주세요.<br />
             폴더 안에 「EUM-Photo」가 자동으로 만들어져요.
           </p>
-          <button type="button" style={styles.bigButton} onClick={handlePickFolder}>
+          <button type="button" className={css.bigButton} onClick={handlePickFolder}>
             📂 작업 폴더 선택
           </button>
         </div>
@@ -1104,9 +1105,9 @@ export default function NewProjectView() {
 
   if (screen === 'loading') {
     return (
-      <div style={styles.fullScreen}>
-        <div style={styles.welcomeCard}>
-          <p style={styles.welcomeText}>{statusMessage}</p>
+      <div className={css.fullScreen}>
+        <div className={css.welcomeCard}>
+          <p className={css.welcomeText}>{statusMessage}</p>
         </div>
       </div>
     )
@@ -1115,20 +1116,20 @@ export default function NewProjectView() {
   if (!meta) return null
 
   return (
-    <div style={styles.app}>
+    <div className={css.app}>
       {/* 상단 바 */}
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <img src={eumLogo} alt="E:UM" style={styles.headerLogo} />
-          <h1 style={styles.appTitle}>E:UM Photo</h1>
-          <span style={styles.workFolder} title={statusMessage}>
+      <header className={css.header}>
+        <div className={css.headerLeft}>
+          <img src={eumLogo} alt="E:UM" className={css.headerLogo} />
+          <h1 className={css.appTitle}>E:UM Photo</h1>
+          <span className={css.workFolder} title={statusMessage}>
             {statusMessage}
           </span>
         </div>
-        <div style={styles.headerRight}>
+        <div className={css.headerRight}>
           <button
             type="button"
-            style={styles.smallButton}
+            className={css.smallButton}
             onClick={() => {
               if (window.eum?.isElectron && meta.rootPath) {
                 void window.eum.openInExplorer(meta.rootPath)
@@ -1290,7 +1291,7 @@ export default function NewProjectView() {
               {drillInFolder && (
                 <button
                   type="button"
-                  style={styles.smallButton}
+                  className={css.smallButton}
                   onClick={() => changeDrillIn(null)}
                 >
                   ← 전체 보기
@@ -1309,7 +1310,7 @@ export default function NewProjectView() {
               {selectedFileNames.size > 0 && (
                 <button
                   type="button"
-                  style={styles.smallButton}
+                  className={css.smallButton}
                   onClick={() => setSelectedFileNames(new Set())}
                 >
                   선택 해제
@@ -1318,7 +1319,7 @@ export default function NewProjectView() {
               {selectedFileNames.size > 0 && (
                 <button
                   type="button"
-                  style={styles.smallButton}
+                  className={css.smallButton}
                   onClick={() => setRenameDialog({ prefix: '', isApplying: false })}
                   title="선택된 사진들의 이름을 한꺼번에 변경"
                 >
@@ -1328,7 +1329,7 @@ export default function NewProjectView() {
               {selectedFileNames.size > 0 && (
                 <button
                   type="button"
-                  style={styles.smallButton}
+                  className={css.smallButton}
                   onClick={() =>
                     setShrinkDialog({
                       maxLongSide: 1920,
@@ -1652,7 +1653,7 @@ export default function NewProjectView() {
               <div style={styles.modalButtons}>
                 <button
                   type="button"
-                  style={styles.smallButtonDanger}
+                  className={css.smallButtonDanger}
                   onClick={() => setRenameDialog(null)}
                   disabled={renameDialog.isApplying}
                 >
@@ -1768,7 +1769,7 @@ export default function NewProjectView() {
               <div style={styles.modalButtons}>
                 <button
                   type="button"
-                  style={styles.smallButtonDanger}
+                  className={css.smallButtonDanger}
                   onClick={() => setShrinkDialog(null)}
                   disabled={shrinkDialog.isApplying}
                 >
@@ -1971,133 +1972,13 @@ function folderKey(f: PersonFolder): string {
 //   강조: 골드 (#fcd34d, #C9962B, #fef3c7)
 //   텍스트: #f1f5f9 (옅은 회색-흰)
 
-const FAMILY_BG_GRADIENT =
-  'linear-gradient(135deg, #020818 0%, #0a1628 50%, #0f2040 100%)'
-const GOLD_TEXT_GRADIENT =
-  'linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #a16207 100%)'
+// 다음 라운드(R2) 이전될 styles에서 사용 중. R2 끝나면 함께 제거 + index.css :root 변수로 일원화.
 const GOLD_BTN_GRADIENT =
   'linear-gradient(135deg, #fcd34d 0%, #C9962B 100%)'
 
+// styles 객체 — Day 7 R1에서 layout/welcome/header 부분은 NewProjectView.module.css로 이전.
+// 잔여 키는 다음 라운드(R2~R4)에서 점진 이전 예정.
 const styles: Record<string, React.CSSProperties> = {
-  fullScreen: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: FAMILY_BG_GRADIENT,
-    fontFamily:
-      '"Pretendard Variable", "Pretendard", "맑은 고딕", system-ui, sans-serif',
-  },
-  welcomeCard: {
-    maxWidth: 520,
-    padding: '48px 40px',
-    background: 'rgba(255, 255, 255, 0.04)',
-    border: '1px solid rgba(252, 211, 77, 0.25)',
-    borderRadius: 16,
-    boxShadow: '0 8px 32px rgba(13, 27, 62, 0.45)',
-    textAlign: 'center',
-    color: '#f1f5f9',
-  },
-  welcomeLogo: {
-    width: 96,
-    height: 96,
-    objectFit: 'contain',
-    margin: '0 auto 12px',
-    display: 'block',
-  },
-  welcomeTitle: {
-    fontSize: 32,
-    margin: '0 0 16px',
-    letterSpacing: '0.04em',
-    fontWeight: 700,
-    background: GOLD_TEXT_GRADIENT,
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-  },
-  welcomeText: {
-    fontSize: 18,
-    color: 'rgba(241, 245, 249, 0.9)',
-    margin: '0 0 12px',
-  },
-  welcomeHint: {
-    fontSize: 15,
-    color: 'rgba(241, 245, 249, 0.65)',
-    lineHeight: 1.6,
-    margin: '0 0 32px',
-  },
-  bigButton: {
-    fontSize: 20,
-    padding: '16px 40px',
-    background: GOLD_BTN_GRADIENT,
-    border: 'none',
-    borderRadius: 12,
-    cursor: 'pointer',
-    color: '#0F2540',
-    fontWeight: 700,
-    boxShadow: '0 4px 16px rgba(201, 150, 43, 0.30)',
-  },
-  app: {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    background: FAMILY_BG_GRADIENT,
-    fontFamily:
-      '"Pretendard Variable", "Pretendard", "맑은 고딕", system-ui, sans-serif',
-    color: '#f1f5f9',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 20px',
-    background: 'rgba(2, 8, 24, 0.85)',
-    borderBottom: '1px solid rgba(252, 211, 77, 0.20)',
-  },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: 12 },
-  headerLogo: {
-    width: 32,
-    height: 32,
-    objectFit: 'contain',
-    flexShrink: 0,
-  },
-  appTitle: {
-    fontSize: 20,
-    margin: 0,
-    letterSpacing: '0.04em',
-    fontWeight: 700,
-    background: GOLD_TEXT_GRADIENT,
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-  },
-  workFolder: {
-    fontSize: 14,
-    color: 'rgba(241, 245, 249, 0.55)',
-    maxWidth: 600,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  headerRight: { display: 'flex', gap: 8 },
-  smallButton: {
-    fontSize: 14,
-    padding: '8px 14px',
-    background: 'rgba(255, 255, 255, 0.06)',
-    border: '1px solid rgba(255, 255, 255, 0.14)',
-    borderRadius: 8,
-    cursor: 'pointer',
-    color: '#f1f5f9',
-  },
-  smallButtonDanger: {
-    fontSize: 14,
-    padding: '8px 14px',
-    background: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.14)',
-    borderRadius: 8,
-    cursor: 'pointer',
-    color: 'rgba(241, 245, 249, 0.85)',
-  },
   body: { flex: 1, display: 'flex', overflow: 'hidden' },
   sidebar: {
     width: 280,

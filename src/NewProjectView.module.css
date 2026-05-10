@@ -1,0 +1,149 @@
+/* 이음 포토 v2 — NewProjectView 스타일
+ *
+ * Day 7 UX 마감 — 인라인 React.CSSProperties 객체에서 점진 이전.
+ * 색·그라디언트 변수는 src/index.css :root 에서 정의 (--eum-*).
+ */
+
+/* ===== Welcome 화면 (작업 폴더 미선택 또는 로딩) ===== */
+
+.fullScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--eum-bg-gradient);
+  font-family: 'Pretendard Variable', 'Pretendard', '맑은 고딕', system-ui, sans-serif;
+}
+
+.welcomeCard {
+  max-width: 520px;
+  padding: 48px 40px;
+  background: var(--eum-overlay-soft);
+  border: 1px solid var(--eum-border-gold-medium);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(13, 27, 62, 0.45);
+  text-align: center;
+  color: var(--eum-text-light);
+}
+
+.welcomeLogo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  display: block;
+}
+
+.welcomeTitle {
+  font-size: 32px;
+  margin: 0 0 16px;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  background: var(--eum-gold-text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcomeText {
+  font-size: 18px;
+  color: var(--eum-text-muted);
+  margin: 0 0 12px;
+}
+
+.welcomeHint {
+  font-size: 15px;
+  color: var(--eum-text-dim);
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.bigButton {
+  font-size: 20px;
+  padding: 16px 40px;
+  background: var(--eum-gold-btn-gradient);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #0F2540;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(201, 150, 43, 0.30);
+}
+
+/* ===== App 최상단 layout ===== */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--eum-bg-gradient);
+  font-family: 'Pretendard Variable', 'Pretendard', '맑은 고딕', system-ui, sans-serif;
+  color: var(--eum-text-light);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--eum-overlay-dark);
+  border-bottom: 1px solid var(--eum-border-gold-soft);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerLogo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.appTitle {
+  font-size: 20px;
+  margin: 0;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  background: var(--eum-gold-text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.workFolder {
+  font-size: 14px;
+  color: var(--eum-text-faint);
+  max-width: 600px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerRight {
+  display: flex;
+  gap: 8px;
+}
+
+.smallButton {
+  font-size: 14px;
+  padding: 8px 14px;
+  background: var(--eum-overlay-soft-2);
+  border: 1px solid var(--eum-overlay-border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--eum-text-light);
+}
+
+.smallButtonDanger {
+  font-size: 14px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--eum-overlay-border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--eum-text-muted);
+}

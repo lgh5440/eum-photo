@@ -9,6 +9,21 @@
   --eum-gold: #C9962B;
   --eum-gold-l: #F0BC78;
 
+  /* NewProjectView 다크 테마 — 이음 포토 전용 */
+  --eum-bg-gradient: linear-gradient(135deg, #020818 0%, #0a1628 50%, #0f2040 100%);
+  --eum-gold-text-gradient: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #a16207 100%);
+  --eum-gold-btn-gradient: linear-gradient(135deg, #fcd34d 0%, #C9962B 100%);
+  --eum-text-light: #f1f5f9;
+  --eum-text-muted: rgba(241, 245, 249, 0.85);
+  --eum-text-dim: rgba(241, 245, 249, 0.65);
+  --eum-text-faint: rgba(241, 245, 249, 0.55);
+  --eum-border-gold-soft: rgba(252, 211, 77, 0.20);
+  --eum-border-gold-medium: rgba(252, 211, 77, 0.25);
+  --eum-overlay-dark: rgba(2, 8, 24, 0.85);
+  --eum-overlay-soft: rgba(255, 255, 255, 0.04);
+  --eum-overlay-soft-2: rgba(255, 255, 255, 0.06);
+  --eum-overlay-border: rgba(255, 255, 255, 0.14);
+
   font-family:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, Roboto, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
