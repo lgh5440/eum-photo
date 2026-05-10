@@ -598,6 +598,84 @@ export async function movePhotoToFolder(
   return next
 }
 
+// 사진 이름 변경 — 원본 + 모든 폴더 사본 디스크 rename + 메타 키 변경.
+// 호출자는 newName 안전 정제(safePathSegment) + 충돌 사전 검사 책임.
+export async function renamePhoto(
+  meta: ProjectMeta,
+  oldName: string,
+  newName: string,
+): Promise<ProjectMeta> {
+  if (oldName === newName) return meta
+  const fs = ipcExt()
+  const photo = meta.photos[oldName]
+  if (!photo) throw new Error(`사진을 찾을 수 없습니다: ${oldName}`)
+  if (meta.photos[newName]) {
+    throw new Error(`이미 같은 이름의 사진이 있습니다: ${newName}`)
+  }
+
+  // 모든 폴더 사본 rename (실패해도 원본 rename 후 메타만 갱신 — best-effort)
+  for (const rel of photo.personFolderPaths) {
+    const oldCopy = joinPath(getOrganizedDir(meta.rootPath), rel, oldName)
+    const newCopy = joinPath(getOrganizedDir(meta.rootPath), rel, newName)
+    try {
+      await fs.rename(oldCopy, newCopy)
+    } catch (err) {
+      console.warn('[renamePhoto] 사본 rename 실패:', oldCopy, err)
+    }
+  }
+
+  // 원본 rename
+  const oldOriginal = joinPath(getOriginalDir(meta.rootPath), oldName)
+  const newOriginal = joinPath(getOriginalDir(meta.rootPath), newName)
+  const result = await fs.rename(oldOriginal, newOriginal)
+  if (!result.ok) {
+    throw new Error(`사진 이름 변경 실패: ${result.reason ?? '알 수 없음'}`)
+  }
+
+  // 메타에서 키 변경 (값 동일)
+  const nextPhotos = { ...meta.photos }
+  nextPhotos[newName] = photo
+  delete nextPhotos[oldName]
+  const next: ProjectMeta = { ...meta, photos: nextPhotos }
+  saveProjectMetaDebounced(next)
+  return next
+}
+
+// 사진 영구 삭제 — 원본 + 모든 폴더 사본 디스크 제거 + 메타 photos에서 제거.
+// 흐리거나 망친 사진 처리용. 되돌릴 수 없음 — 호출자가 confirm 받기.
+export async function deletePhoto(
+  meta: ProjectMeta,
+  fileName: string,
+): Promise<ProjectMeta> {
+  const fs = ipc()
+  const photo = meta.photos[fileName]
+  if (!photo) return meta
+
+  // 모든 폴더 사본 제거 (실패해도 진행 — best-effort)
+  for (const rel of photo.personFolderPaths) {
+    const copyPath = joinPath(getOrganizedDir(meta.rootPath), rel, fileName)
+    try {
+      await fs.remove(copyPath, { recursive: false })
+    } catch (err) {
+      console.warn('[deletePhoto] 사본 삭제 실패:', copyPath, err)
+    }
+  }
+
+  // 원본 파일 제거
+  const originalPath = joinPath(getOriginalDir(meta.rootPath), fileName)
+  const removeResult = await fs.remove(originalPath, { recursive: false })
+  if (!removeResult.ok) {
+    throw new Error(`사진 삭제 실패: ${removeResult.reason ?? '알 수 없음'}\n경로: ${originalPath}`)
+  }
+
+  // 메타에서 제거
+  const nextPhotos = { ...meta.photos }
+  delete nextPhotos[fileName]
+  const next: ProjectMeta = { ...meta, photos: nextPhotos }
+  saveProjectMetaDebounced(next)
+  return next
+}
+
 // 사진을 인물 폴더에서 빼기 (디스크 사본 제거 + 메타 갱신). 원본은 `원본/`에 그대로.
 export async function removePhotoFromFolder(
   meta: ProjectMeta,

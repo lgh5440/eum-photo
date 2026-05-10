@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.eum.photo",
-    "productName": "이음 포토",
+    "productName": "EUM Photo",
     "directories": {
       "output": "release"
     },
