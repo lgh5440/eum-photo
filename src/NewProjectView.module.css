@@ -497,3 +497,430 @@
   pointer-events: none;
   z-index: 5;
 }
+
+/* ===== Context Menu (R4) ===== */
+
+.menu {
+  position: fixed;
+  background: #0f2040;
+  border: 1px solid var(--eum-border-gold-medium);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  padding: 4px;
+  min-width: 180px;
+  z-index: 1000;
+  color: var(--eum-text-light);
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--eum-text-light);
+  border-radius: 4px;
+}
+
+.menuItemDanger {
+  color: #ff8a8a;
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--eum-border-gold-soft);
+  margin: 4px 0;
+}
+
+.menuHeader {
+  padding: 8px 12px 6px;
+  font-size: 12px;
+  color: var(--eum-text-faint);
+  border-bottom: 1px solid var(--eum-border-gold-soft);
+  margin-bottom: 4px;
+}
+
+/* ===== Modal (R4) — rename, add photos progress 등 ===== */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modalCard {
+  width: 100%;
+  max-width: 540px;
+  background: linear-gradient(150deg, #0a1628 0%, #0f2040 50%, #1a1050 100%);
+  border: 1px solid rgba(252, 211, 77, 0.30);
+  border-radius: 12px;
+  padding: 24px 24px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color: var(--eum-text-light);
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fcd34d;
+  margin: 0 0 8px;
+}
+
+.modalHint {
+  font-size: 13px;
+  color: rgba(241, 245, 249, 0.7);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.modalInput {
+  width: 100%;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  background: var(--eum-overlay-soft-2);
+  color: var(--eum-text-light);
+  outline: none;
+  margin-bottom: 16px;
+}
+
+.modalPreview {
+  background: rgba(0, 0, 0, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 20px;
+  min-height: 80px;
+}
+
+.modalPreviewLabel {
+  font-size: 12px;
+  color: var(--eum-text-faint);
+  margin-bottom: 8px;
+}
+
+.modalPreviewRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 0;
+  font-family: monospace;
+}
+
+.modalPreviewOld {
+  color: var(--eum-text-faint);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modalPreviewArrow {
+  color: #fcd34d;
+  flex-shrink: 0;
+}
+
+.modalPreviewNew {
+  color: #fef3c7;
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalApplyBtn {
+  font-size: 14px;
+  padding: 8px 18px;
+  background: var(--eum-gold-btn-gradient);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0F2540;
+  font-weight: 700;
+}
+
+.modalApplyBtnDisabled {
+  font-size: 14px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 6px;
+  cursor: not-allowed;
+  color: rgba(241, 245, 249, 0.4);
+  font-weight: 700;
+}
+
+.modalLabel {
+  font-size: 13px;
+  color: rgba(241, 245, 249, 0.7);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.modalPresetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.modalPreset {
+  font-size: 13px;
+  padding: 6px 12px;
+  background: var(--eum-overlay-soft-2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--eum-text-light);
+  min-width: 60px;
+}
+
+.modalPresetActive {
+  font-size: 13px;
+  padding: 6px 12px;
+  background: rgba(252, 211, 77, 0.20);
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fef3c7;
+  min-width: 60px;
+  font-weight: 700;
+}
+
+.modalNumberInput {
+  font-size: 13px;
+  padding: 6px 10px;
+  width: 90px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: var(--eum-overlay-soft-2);
+  color: var(--eum-text-light);
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.modalUnit {
+  font-size: 13px;
+  color: var(--eum-text-faint);
+  margin-left: -2px;
+}
+
+.modalRange {
+  width: 100%;
+  margin-bottom: 16px;
+  accent-color: #fcd34d;
+}
+
+.modalProgress {
+  font-size: 13px;
+  color: #fcd34d;
+  background: rgba(252, 211, 77, 0.10);
+  border: 1px solid rgba(252, 211, 77, 0.30);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ===== Lightbox (R4) — 사진 크게 보기 ===== */
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.lightboxNavLeft {
+  left: 24px;
+}
+
+.lightboxNavRight {
+  right: 24px;
+}
+
+.lightboxNavDisabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.lightboxImageWrap {
+  max-width: 85vw;
+  max-height: 80vh;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxImage {
+  max-width: 85vw;
+  max-height: 80vh;
+  object-fit: contain;
+  transform-origin: center;
+  transition: transform 0.12s ease-out;
+  user-select: none;
+}
+
+.lightboxBottomBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 24px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 2;
+}
+
+.lightboxInfo {
+  font-size: 13px;
+  color: #fef3c7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.lightboxControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lightboxButton {
+  padding: 8px 14px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lightboxZoomLabel {
+  font-size: 14px;
+  color: #fcd34d;
+  min-width: 56px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.lightboxKeyHint {
+  color: #fcd34d;
+  font-weight: 500;
+}
+
+.lightboxFolderBar {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid var(--eum-border-gold-medium);
+  border-radius: 12px;
+  z-index: 2;
+  max-width: 92vw;
+  overflow-x: auto;
+}
+
+.lightboxFolderBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  min-width: 64px;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.lightboxFolderBtnIncluded {
+  background: rgba(127, 201, 127, 0.22);
+  border-color: #7FC97F;
+}
+
+.lightboxFolderNum {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fcd34d;
+  line-height: 1;
+}
+
+.lightboxFolderName {
+  font-size: 11px;
+  color: #fef3c7;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lightboxFolderCheck {
+  font-size: 13px;
+  color: #7FC97F;
+  font-weight: 700;
+  margin-top: 2px;
+}

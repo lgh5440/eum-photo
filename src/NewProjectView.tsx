@@ -1503,12 +1503,13 @@ export default function NewProjectView() {
       {/* 폴더 우클릭 메뉴 */}
       {folderMenu && (
         <div
-          style={{ ...styles.menu, top: folderMenu.y, left: folderMenu.x }}
+          className={css.menu}
+          style={{ top: folderMenu.y, left: folderMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
             type="button"
-            style={styles.menuItem}
+            className={css.menuItem}
             onClick={() => {
               changeDrillIn(folderKey(folderMenu.folder))
               setFolderMenu(null)
@@ -1518,7 +1519,7 @@ export default function NewProjectView() {
           </button>
           <button
             type="button"
-            style={styles.menuItem}
+            className={css.menuItem}
             onClick={() => {
               startRename(folderMenu.folder)
               setFolderMenu(null)
@@ -1528,7 +1529,7 @@ export default function NewProjectView() {
           </button>
           <button
             type="button"
-            style={{ ...styles.menuItem, ...styles.menuItemDanger }}
+            className={cn(css.menuItem, css.menuItemDanger)}
             onClick={() => {
               void handleDeleteFolder(folderMenu.folder)
               setFolderMenu(null)
@@ -1564,10 +1565,11 @@ export default function NewProjectView() {
 
         return (
           <div
-            style={{ ...styles.menu, top: photoMenu.y, left: photoMenu.x }}
+            className={css.menu}
+            style={{ top: photoMenu.y, left: photoMenu.x }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={styles.menuHeader}>
+            <div className={css.menuHeader}>
               {photoFolders.length === 0
                 ? '아직 어느 폴더에도 들어있지 않아요'
                 : `${photoFolders.length}개 폴더에 들어있어요 — 어디서 뺄까요?`}
@@ -1576,7 +1578,7 @@ export default function NewProjectView() {
               <button
                 key={getPersonFolderRelPath(folder)}
                 type="button"
-                style={{ ...styles.menuItem, ...styles.menuItemDanger }}
+                className={cn(css.menuItem, css.menuItemDanger)}
                 onClick={() => {
                   void removeFromFolder(photoMenu.fileName, folder)
                   setPhotoMenu(null)
@@ -1585,10 +1587,10 @@ export default function NewProjectView() {
                 ❌ 「{num != null ? `${num}. ` : ''}{folder.name}」 폴더에서 빼기
               </button>
             ))}
-            <div style={styles.menuDivider} />
+            <div className={css.menuDivider} />
             <button
               type="button"
-              style={{ ...styles.menuItem, ...styles.menuItemDanger }}
+              className={cn(css.menuItem, css.menuItemDanger)}
               onClick={() => {
                 void deleteSelectedPhotos(targetNames)
                 setPhotoMenu(null)
@@ -1609,17 +1611,17 @@ export default function NewProjectView() {
         const canApply = pairs.length === total && pairs.length > 0
         return (
           <div
-            style={styles.modalOverlay}
+            className={css.modalOverlay}
             onClick={() => !renameDialog.isApplying && setRenameDialog(null)}
           >
             <div
-              style={styles.modalCard}
+              className={css.modalCard}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 style={styles.modalTitle}>
+              <h3 className={css.modalTitle}>
                 ✏️ 사진 {total}장 이름 일괄 변경
               </h3>
-              <p style={styles.modalHint}>
+              <p className={css.modalHint}>
                 새 이름은 「<b>입력한 단어 + 번호.확장자</b>」 형태가 됩니다.
               </p>
               <input
@@ -1630,7 +1632,7 @@ export default function NewProjectView() {
                 }
                 placeholder="예: 방학동총잡이"
                 autoFocus
-                style={styles.modalInput}
+                className={css.modalInput}
                 disabled={renameDialog.isApplying}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && canApply) {
@@ -1642,20 +1644,20 @@ export default function NewProjectView() {
                 }}
               />
 
-              <div style={styles.modalPreview}>
-                <div style={styles.modalPreviewLabel}>
+              <div className={css.modalPreview}>
+                <div className={css.modalPreviewLabel}>
                   미리보기 ({pairs.length === 0 ? '단어를 입력하세요' : `처음 ${previewPairs.length}장 / 총 ${pairs.length}장`})
                 </div>
                 {previewPairs.map(({ oldName, newName }) => (
-                  <div key={oldName} style={styles.modalPreviewRow}>
-                    <span style={styles.modalPreviewOld}>{oldName}</span>
-                    <span style={styles.modalPreviewArrow}>→</span>
-                    <span style={styles.modalPreviewNew}>{newName}</span>
+                  <div key={oldName} className={css.modalPreviewRow}>
+                    <span className={css.modalPreviewOld}>{oldName}</span>
+                    <span className={css.modalPreviewArrow}>→</span>
+                    <span className={css.modalPreviewNew}>{newName}</span>
                   </div>
                 ))}
               </div>
 
-              <div style={styles.modalButtons}>
+              <div className={css.modalButtons}>
                 <button
                   type="button"
                   className={css.smallButtonDanger}
@@ -1666,10 +1668,10 @@ export default function NewProjectView() {
                 </button>
                 <button
                   type="button"
-                  style={
+                  className={
                     canApply && !renameDialog.isApplying
-                      ? styles.modalApplyBtn
-                      : styles.modalApplyBtnDisabled
+                      ? css.modalApplyBtn
+                      : css.modalApplyBtnDisabled
                   }
                   onClick={() => void applyBulkRename(renameDialog.prefix)}
                   disabled={!canApply || renameDialog.isApplying}
@@ -1690,32 +1692,32 @@ export default function NewProjectView() {
         const total = shrinkDialog.total
         return (
           <div
-            style={styles.modalOverlay}
+            className={css.modalOverlay}
             onClick={() => !shrinkDialog.isApplying && setShrinkDialog(null)}
           >
             <div
-              style={styles.modalCard}
+              className={css.modalCard}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 style={styles.modalTitle}>
+              <h3 className={css.modalTitle}>
                 📐 사진 {total}장 사이즈 일괄 변경
               </h3>
-              <p style={styles.modalHint}>
+              <p className={css.modalHint}>
                 「공유용/」 폴더에 줄인 jpg 사본을 저장해요. 원본은 그대로.
               </p>
 
-              <div style={styles.modalLabel}>
+              <div className={css.modalLabel}>
                 긴 변 최대 픽셀 — 100 ~ 16000 자유 입력
               </div>
-              <div style={styles.modalPresetRow}>
+              <div className={css.modalPresetRow}>
                 {presets.map((px) => (
                   <button
                     key={px}
                     type="button"
-                    style={
+                    className={
                       shrinkDialog.maxLongSide === px
-                        ? styles.modalPresetActive
-                        : styles.modalPreset
+                        ? css.modalPresetActive
+                        : css.modalPreset
                     }
                     onClick={() =>
                       setShrinkDialog({ ...shrinkDialog, maxLongSide: px })
@@ -1740,13 +1742,13 @@ export default function NewProjectView() {
                       maxLongSide: Math.max(100, Math.min(16000, Math.round(next))),
                     })
                   }}
-                  style={styles.modalNumberInput}
+                  className={css.modalNumberInput}
                   disabled={shrinkDialog.isApplying}
                 />
-                <span style={styles.modalUnit}>px</span>
+                <span className={css.modalUnit}>px</span>
               </div>
 
-              <div style={styles.modalLabel}>
+              <div className={css.modalLabel}>
                 품질 (jpg) — {Math.round(shrinkDialog.quality * 100)}%
               </div>
               <input
@@ -1762,16 +1764,16 @@ export default function NewProjectView() {
                   })
                 }
                 disabled={shrinkDialog.isApplying}
-                style={styles.modalRange}
+                className={css.modalRange}
               />
 
               {shrinkDialog.isApplying && (
-                <div style={styles.modalProgress}>
+                <div className={css.modalProgress}>
                   처리 중… {shrinkDialog.done} / {shrinkDialog.total}장
                 </div>
               )}
 
-              <div style={styles.modalButtons}>
+              <div className={css.modalButtons}>
                 <button
                   type="button"
                   className={css.smallButtonDanger}
@@ -1782,10 +1784,10 @@ export default function NewProjectView() {
                 </button>
                 <button
                   type="button"
-                  style={
+                  className={
                     !shrinkDialog.isApplying
-                      ? styles.modalApplyBtn
-                      : styles.modalApplyBtnDisabled
+                      ? css.modalApplyBtn
+                      : css.modalApplyBtnDisabled
                   }
                   onClick={() =>
                     void applyBulkShrink(
@@ -1815,10 +1817,10 @@ export default function NewProjectView() {
         const canPrev = lightboxIndex > 0
         const canNext = lightboxIndex >= 0 && lightboxIndex < total - 1
         return (
-          <div style={styles.lightboxOverlay} onClick={closeLightbox}>
+          <div className={css.lightboxOverlay} onClick={closeLightbox}>
             <button
               type="button"
-              style={styles.lightboxClose}
+              className={css.lightboxClose}
               onClick={closeLightbox}
               title="닫기 (Esc)"
             >
@@ -1827,11 +1829,11 @@ export default function NewProjectView() {
 
             <button
               type="button"
-              style={{
-                ...styles.lightboxNav,
-                ...styles.lightboxNavLeft,
-                ...(canPrev ? null : styles.lightboxNavDisabled),
-              }}
+              className={cn(
+                css.lightboxNav,
+                css.lightboxNavLeft,
+                !canPrev && css.lightboxNavDisabled,
+              )}
               onClick={(e) => {
                 e.stopPropagation()
                 showPrevPhoto()
@@ -1843,7 +1845,7 @@ export default function NewProjectView() {
             </button>
 
             <div
-              style={styles.lightboxImageWrap}
+              className={css.lightboxImageWrap}
               onClick={(e) => e.stopPropagation()}
             >
               {url ? (
@@ -1851,10 +1853,8 @@ export default function NewProjectView() {
                   src={url}
                   alt={lightboxName}
                   draggable={false}
-                  style={{
-                    ...styles.lightboxImage,
-                    transform: `scale(${lightboxZoom})`,
-                  }}
+                  className={css.lightboxImage}
+                  style={{ transform: `scale(${lightboxZoom})` }}
                 />
               ) : (
                 <div style={{ color: '#fff' }}>로드 중…</div>
@@ -1863,11 +1863,11 @@ export default function NewProjectView() {
 
             <button
               type="button"
-              style={{
-                ...styles.lightboxNav,
-                ...styles.lightboxNavRight,
-                ...(canNext ? null : styles.lightboxNavDisabled),
-              }}
+              className={cn(
+                css.lightboxNav,
+                css.lightboxNavRight,
+                !canNext && css.lightboxNavDisabled,
+              )}
               onClick={(e) => {
                 e.stopPropagation()
                 showNextPhoto()
@@ -1881,7 +1881,7 @@ export default function NewProjectView() {
             {/* 폴더 키패드 — 들어있는 폴더 시각화 + 클릭으로 추가 */}
             {sortedFolders.length > 0 && (
               <div
-                style={styles.lightboxFolderBar}
+                className={css.lightboxFolderBar}
                 onClick={(e) => e.stopPropagation()}
               >
                 {sortedFolders.map((folder) => {
@@ -1893,10 +1893,10 @@ export default function NewProjectView() {
                     <button
                       key={rel}
                       type="button"
-                      style={{
-                        ...styles.lightboxFolderBtn,
-                        ...(isIncluded ? styles.lightboxFolderBtnIncluded : null),
-                      }}
+                      className={cn(
+                        css.lightboxFolderBtn,
+                        isIncluded && css.lightboxFolderBtnIncluded,
+                      )}
                       onClick={() => void handleLightboxToggleFolder(num)}
                       title={
                         isIncluded
@@ -1904,12 +1904,12 @@ export default function NewProjectView() {
                           : `${num}. ${folder.name} — 누르면 추가${hasShortcut ? ` (키 ${num})` : ''}`
                       }
                     >
-                      <span style={styles.lightboxFolderNum}>{num}</span>
-                      <span style={styles.lightboxFolderName}>
+                      <span className={css.lightboxFolderNum}>{num}</span>
+                      <span className={css.lightboxFolderName}>
                         {folder.name}
                       </span>
                       {isIncluded && (
-                        <span style={styles.lightboxFolderCheck}>✓</span>
+                        <span className={css.lightboxFolderCheck}>✓</span>
                       )}
                     </button>
                   )
@@ -1918,31 +1918,31 @@ export default function NewProjectView() {
             )}
 
             <div
-              style={styles.lightboxBottomBar}
+              className={css.lightboxBottomBar}
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={styles.lightboxInfo}>
+              <div className={css.lightboxInfo}>
                 {lightboxName} · {idx}/{total}
-                <span style={styles.lightboxKeyHint}>
+                <span className={css.lightboxKeyHint}>
                   {' '}· 💡 숫자 1~9 = 추가/빼기 토글 · ← → 사진 이동
                 </span>
               </div>
-              <div style={styles.lightboxControls}>
+              <div className={css.lightboxControls}>
                 <button
                   type="button"
-                  style={styles.lightboxButton}
+                  className={css.lightboxButton}
                   onClick={zoomOut}
                   disabled={lightboxZoom <= ZOOM_STEPS[0]}
                   title="축소 (−)"
                 >
                   − 축소
                 </button>
-                <span style={styles.lightboxZoomLabel}>
+                <span className={css.lightboxZoomLabel}>
                   {Math.round(lightboxZoom * 100)}%
                 </span>
                 <button
                   type="button"
-                  style={styles.lightboxButton}
+                  className={css.lightboxButton}
                   onClick={zoomIn}
                   disabled={lightboxZoom >= ZOOM_STEPS[ZOOM_STEPS.length - 1]}
                   title="확대 (+)"
@@ -1951,7 +1951,7 @@ export default function NewProjectView() {
                 </button>
                 <button
                   type="button"
-                  style={styles.lightboxButton}
+                  className={css.lightboxButton}
                   onClick={() => setLightboxZoom(1)}
                   title="원본 크기 (0)"
                 >
@@ -1972,382 +1972,5 @@ function folderKey(f: PersonFolder): string {
   return f.parentPath ? `${f.parentPath}/${f.name}` : f.name
 }
 
-// ===== 스타일 — 이음 패밀리 다크 네이비 톤 (eum-camp 토큰 기준) =====
-//   배경: linear-gradient(135deg, #020818, #0a1628, #0f2040)
-//   강조: 골드 (#fcd34d, #C9962B, #fef3c7)
-//   텍스트: #f1f5f9 (옅은 회색-흰)
+// 스타일은 NewProjectView.module.css 로 일원화. 색·그라디언트·폰트는 src/index.css :root --eum-* 변수.
 
-// styles 객체 — Day 7 R1·R2·R3에서 welcome/header/sidebar/폴더 트리/메인 영역·사진 그리드는 NewProjectView.module.css로 이전.
-// 잔여 키는 다음 라운드(R4)에서 점진 이전 예정 (menu·modal·lightbox).
-const styles: Record<string, React.CSSProperties> = {
-  menu: {
-    position: 'fixed',
-    background: '#0f2040',
-    border: '1px solid rgba(252, 211, 77, 0.25)',
-    borderRadius: 8,
-    boxShadow: '0 8px 28px rgba(0, 0, 0, 0.5)',
-    padding: 4,
-    minWidth: 180,
-    zIndex: 1000,
-    color: '#f1f5f9',
-  },
-  menuItem: {
-    display: 'block',
-    width: '100%',
-    textAlign: 'left' as const,
-    padding: '8px 12px',
-    border: 'none',
-    background: 'transparent',
-    cursor: 'pointer',
-    fontSize: 14,
-    color: '#f1f5f9',
-    borderRadius: 4,
-  },
-  menuItemDanger: { color: '#ff8a8a' },
-  menuDivider: {
-    height: 1,
-    background: 'rgba(252, 211, 77, 0.20)',
-    margin: '4px 0',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0, 0, 0, 0.65)',
-    zIndex: 1500,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 540,
-    background:
-      'linear-gradient(150deg, #0a1628 0%, #0f2040 50%, #1a1050 100%)',
-    border: '1px solid rgba(252, 211, 77, 0.30)',
-    borderRadius: 12,
-    padding: '24px 24px 20px',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.6)',
-    color: '#f1f5f9',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 700,
-    color: '#fcd34d',
-    margin: '0 0 8px',
-  },
-  modalHint: {
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.7)',
-    margin: '0 0 16px',
-    lineHeight: 1.5,
-  },
-  modalInput: {
-    width: '100%',
-    fontSize: 16,
-    padding: '10px 12px',
-    border: '1px solid rgba(255, 255, 255, 0.18)',
-    borderRadius: 6,
-    background: 'rgba(255, 255, 255, 0.06)',
-    color: '#f1f5f9',
-    outline: 'none',
-    marginBottom: 16,
-  },
-  modalPreview: {
-    background: 'rgba(0, 0, 0, 0.30)',
-    border: '1px solid rgba(255, 255, 255, 0.10)',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    minHeight: 80,
-  },
-  modalPreviewLabel: {
-    fontSize: 12,
-    color: 'rgba(241, 245, 249, 0.55)',
-    marginBottom: 8,
-  },
-  modalPreviewRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    fontSize: 12,
-    padding: '4px 0',
-    fontFamily: 'monospace',
-  },
-  modalPreviewOld: {
-    color: 'rgba(241, 245, 249, 0.55)',
-    flex: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  modalPreviewArrow: {
-    color: '#fcd34d',
-    flexShrink: 0,
-  },
-  modalPreviewNew: {
-    color: '#fef3c7',
-    fontWeight: 600,
-    flex: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  modalButtons: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: 8,
-  },
-  modalApplyBtn: {
-    fontSize: 14,
-    padding: '8px 18px',
-    background:
-      'linear-gradient(135deg, #fcd34d 0%, #C9962B 100%)',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: '#0F2540',
-    fontWeight: 700,
-  },
-  modalApplyBtnDisabled: {
-    fontSize: 14,
-    padding: '8px 18px',
-    background: 'rgba(255, 255, 255, 0.08)',
-    border: '1px solid rgba(255, 255, 255, 0.10)',
-    borderRadius: 6,
-    cursor: 'not-allowed',
-    color: 'rgba(241, 245, 249, 0.4)',
-    fontWeight: 700,
-  },
-  modalLabel: {
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.7)',
-    marginBottom: 8,
-    fontWeight: 600,
-  },
-  modalPresetRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 16,
-    alignItems: 'center',
-  },
-  modalPreset: {
-    fontSize: 13,
-    padding: '6px 12px',
-    background: 'rgba(255, 255, 255, 0.06)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: '#f1f5f9',
-    minWidth: 60,
-  },
-  modalPresetActive: {
-    fontSize: 13,
-    padding: '6px 12px',
-    background: 'rgba(252, 211, 77, 0.20)',
-    border: '1px solid #fcd34d',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: '#fef3c7',
-    minWidth: 60,
-    fontWeight: 700,
-  },
-  modalNumberInput: {
-    fontSize: 13,
-    padding: '6px 10px',
-    width: 90,
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    borderRadius: 6,
-    background: 'rgba(255, 255, 255, 0.06)',
-    color: '#f1f5f9',
-    outline: 'none',
-    fontVariantNumeric: 'tabular-nums',
-  },
-  modalUnit: {
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.55)',
-    marginLeft: -2,
-  },
-  modalRange: {
-    width: '100%',
-    marginBottom: 16,
-    accentColor: '#fcd34d',
-  },
-  modalProgress: {
-    fontSize: 13,
-    color: '#fcd34d',
-    background: 'rgba(252, 211, 77, 0.10)',
-    border: '1px solid rgba(252, 211, 77, 0.30)',
-    padding: '8px 12px',
-    borderRadius: 6,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  menuHeader: {
-    padding: '8px 12px 6px',
-    fontSize: 12,
-    color: 'rgba(241, 245, 249, 0.55)',
-    borderBottom: '1px solid rgba(252, 211, 77, 0.20)',
-    marginBottom: 4,
-  },
-  lightboxOverlay: {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0, 0, 0, 0.92)',
-    zIndex: 2000,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lightboxClose: {
-    position: 'absolute',
-    top: 16,
-    right: 20,
-    width: 44,
-    height: 44,
-    borderRadius: '50%',
-    border: 'none',
-    background: 'rgba(255,255,255,0.12)',
-    color: '#fff',
-    fontSize: 20,
-    cursor: 'pointer',
-    zIndex: 2,
-  },
-  lightboxNav: {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    width: 56,
-    height: 56,
-    borderRadius: '50%',
-    border: 'none',
-    background: 'rgba(255,255,255,0.12)',
-    color: '#fff',
-    fontSize: 22,
-    cursor: 'pointer',
-    zIndex: 2,
-  },
-  lightboxNavLeft: { left: 24 },
-  lightboxNavRight: { right: 24 },
-  lightboxNavDisabled: {
-    opacity: 0.25,
-    cursor: 'not-allowed',
-  },
-  lightboxImageWrap: {
-    maxWidth: '85vw',
-    maxHeight: '80vh',
-    overflow: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lightboxImage: {
-    maxWidth: '85vw',
-    maxHeight: '80vh',
-    objectFit: 'contain',
-    transformOrigin: 'center',
-    transition: 'transform 0.12s ease-out',
-    userSelect: 'none',
-  },
-  lightboxBottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: '14px 24px',
-    background: 'rgba(0,0,0,0.45)',
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-    zIndex: 2,
-  },
-  lightboxInfo: {
-    fontSize: 13,
-    color: '#fef3c7',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    flex: 1,
-  },
-  lightboxControls: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  lightboxButton: {
-    padding: '8px 14px',
-    fontSize: 14,
-    background: 'rgba(255,255,255,0.12)',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-  },
-  lightboxZoomLabel: {
-    fontSize: 14,
-    color: '#fcd34d',
-    minWidth: 56,
-    textAlign: 'center',
-    fontWeight: 600,
-  },
-  lightboxKeyHint: {
-    color: '#fcd34d',
-    fontWeight: 500,
-  },
-  lightboxFolderBar: {
-    position: 'absolute',
-    bottom: 64,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'flex',
-    gap: 6,
-    padding: '8px 12px',
-    background: 'rgba(0,0,0,0.65)',
-    border: '1px solid rgba(252, 211, 77, 0.25)',
-    borderRadius: 12,
-    zIndex: 2,
-    maxWidth: '92vw',
-    overflowX: 'auto',
-  },
-  lightboxFolderBtn: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 2,
-    padding: '8px 12px',
-    background: 'rgba(255,255,255,0.06)',
-    border: '2px solid transparent',
-    borderRadius: 8,
-    color: '#fff',
-    cursor: 'pointer',
-    minWidth: 64,
-    transition: 'background 0.1s, border-color 0.1s',
-  },
-  lightboxFolderBtnIncluded: {
-    background: 'rgba(127, 201, 127, 0.22)',
-    borderColor: '#7FC97F',
-  },
-  lightboxFolderNum: {
-    fontSize: 22,
-    fontWeight: 700,
-    color: '#fcd34d',
-    lineHeight: 1,
-  },
-  lightboxFolderName: {
-    fontSize: 11,
-    color: '#fef3c7',
-    maxWidth: 80,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  lightboxFolderCheck: {
-    fontSize: 13,
-    color: '#7FC97F',
-    fontWeight: 700,
-    marginTop: 2,
-  },
-}
