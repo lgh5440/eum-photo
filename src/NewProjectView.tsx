@@ -1259,36 +1259,36 @@ export default function NewProjectView() {
         {/* 우측 — 사진 추가 + 썸네일 그리드. 외부 드롭으로 추가는 비활성. */}
         <main
           ref={mainRef}
-          style={styles.mainArea}
+          className={css.mainArea}
           onDragOver={blockExternalDrop}
           onDrop={blockExternalDrop}
           onMouseDown={handleMainMouseDown}
         >
-          <div style={styles.mainHeader}>
-            <div style={styles.mainHeaderLeft}>
-              <h2 style={styles.mainHeaderTitle}>
+          <div className={css.mainHeader}>
+            <div className={css.mainHeaderLeft}>
+              <h2 className={css.mainHeaderTitle}>
                 {drillInFolder
                   ? `📁 ${drillInFolder.name}`
                   : showOnlyUnclassified
                     ? '🗂 미분류 사진'
                     : '📷 모든 사진'}
               </h2>
-              <span style={styles.mainHeaderCount}>
+              <span className={css.mainHeaderCount}>
                 {visiblePhotoNames.length}장
                 {!drillInFolder && photoStats.total > 0 && (
                   <>
                     {' '}· 전체 {photoStats.total} ·{' '}
-                    <span style={styles.statClassified}>
+                    <span className={css.statClassified}>
                       분류 {photoStats.classified}
                     </span>{' '}
                     ·{' '}
-                    <span style={styles.statUnclassified}>
+                    <span className={css.statUnclassified}>
                       미분류 {photoStats.unclassified}
                     </span>
                   </>
                 )}
                 {selectedFileNames.size > 0 && (
-                  <span style={styles.selectedCount}>
+                  <span className={css.selectedCount}>
                     {' '}· 선택 {selectedFileNames.size}장
                   </span>
                 )}
@@ -1303,7 +1303,7 @@ export default function NewProjectView() {
                 </button>
               )}
               {!drillInFolder && photoStats.total > 0 && (
-                <label style={styles.toggleRow}>
+                <label className={css.toggleRow}>
                   <input
                     type="checkbox"
                     checked={showOnlyUnclassified}
@@ -1350,7 +1350,7 @@ export default function NewProjectView() {
                 </button>
               )}
               {selectedFileNames.size > 0 && activeFolder && (
-                <span style={styles.spaceHint}>
+                <span className={css.spaceHint}>
                   💡 스페이스바 = 「
                   {folderNumberMap.get(folderKey(activeFolder)) != null
                     ? `${folderNumberMap.get(folderKey(activeFolder))}. `
@@ -1359,10 +1359,10 @@ export default function NewProjectView() {
                 </span>
               )}
             </div>
-            <div style={styles.mainHeaderRight}>
+            <div className={css.mainHeaderRight}>
               <button
                 type="button"
-                style={styles.bigAddButton}
+                className={css.bigAddButton}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isAdding}
               >
@@ -1381,8 +1381,8 @@ export default function NewProjectView() {
 
           {rubberBand && (
             <div
+              className={css.rubberBand}
               style={{
-                ...styles.rubberBand,
                 left: rubberBand.x,
                 top: rubberBand.y,
                 width: rubberBand.w,
@@ -1392,36 +1392,36 @@ export default function NewProjectView() {
           )}
 
           {visiblePhotoNames.length === 0 ? (
-            <div style={styles.emptyDropZone}>
+            <div className={css.emptyDropZone}>
               {drillInFolder ? (
                 <>
-                  <p style={styles.emptyDropTitle}>
+                  <p className={css.emptyDropTitle}>
                     「{drillInFolder.name}」 폴더에 아직 사진이 없어요
                   </p>
-                  <p style={styles.emptyDropHint}>
+                  <p className={css.emptyDropHint}>
                     「← 전체 보기」로 돌아가서 사진을 「{drillInFolder.name}」 폴더로<br />
                     끌어다 놓으면 이 폴더로 보내져요.
                   </p>
                 </>
               ) : showOnlyUnclassified && photoStats.total > 0 ? (
                 <>
-                  <p style={styles.emptyDropTitle}>미분류 사진이 없어요</p>
-                  <p style={styles.emptyDropHint}>
+                  <p className={css.emptyDropTitle}>미분류 사진이 없어요</p>
+                  <p className={css.emptyDropHint}>
                     분류 안 된 사진이 더 있다면 「☐ 미분류만 보기」를 끄고<br />
                     원본을 다시 확인해 주세요.
                   </p>
                 </>
               ) : (
                 <>
-                  <p style={styles.emptyDropTitle}>아직 사진이 없어요</p>
-                  <p style={styles.emptyDropHint}>
+                  <p className={css.emptyDropTitle}>아직 사진이 없어요</p>
+                  <p className={css.emptyDropHint}>
                     위 「+ 사진 추가」 버튼을 눌러 사진을 불러오세요.
                   </p>
                 </>
               )}
             </div>
           ) : (
-            <div style={styles.grid}>
+            <div className={css.grid}>
               {visiblePhotoNames.map((name) => {
                 const url = photoUrls.get(name)
                 const isSelected = selectedFileNames.has(name)
@@ -1442,10 +1442,10 @@ export default function NewProjectView() {
                   <div
                     key={name}
                     data-photo-card={name}
-                    style={{
-                      ...styles.photoCard,
-                      ...(isSelected ? styles.photoCardSelected : null),
-                    }}
+                    className={cn(
+                      css.photoCard,
+                      isSelected && css.photoCardSelected,
+                    )}
                     draggable
                     onClick={handlePhotoClick(name, visiblePhotoNames)}
                     onDoubleClick={(e) => {
@@ -1461,30 +1461,30 @@ export default function NewProjectView() {
                         : '클릭 = 선택 · 더블클릭 = 크게 보기 · Ctrl/Shift+클릭 = 다중 선택 · 끌어서 좌측 인물 폴더로 · 우클릭 = 폴더에서 빼기'
                     }
                   >
-                    <div style={styles.photoThumbWrap}>
+                    <div className={css.photoThumbWrap}>
                       {url ? (
                         <img
                           src={url}
                           alt={name}
-                          style={styles.photoImg}
+                          className={css.photoImg}
                           draggable={false}
                         />
                       ) : (
-                        <div style={styles.photoLoading}>로드 중…</div>
+                        <div className={css.photoLoading}>로드 중…</div>
                       )}
                       {isSelected && (
-                        <div style={styles.selectedBadge}>✓</div>
+                        <div className={css.selectedBadge}>✓</div>
                       )}
                     </div>
-                    <span style={styles.photoCaption} title={name}>
+                    <span className={css.photoCaption} title={name}>
                       {name}
                     </span>
                     {folderEntries.length > 0 && (
-                      <div style={styles.folderTagsList}>
+                      <div className={css.folderTagsList}>
                         {folderEntries.map((entry, i) => (
                           <span
                             key={i}
-                            style={styles.folderTag}
+                            className={css.folderTag}
                             title={entry.name}
                           >
                             {entry.num != null ? entry.num : entry.name}
@@ -1977,190 +1977,9 @@ function folderKey(f: PersonFolder): string {
 //   강조: 골드 (#fcd34d, #C9962B, #fef3c7)
 //   텍스트: #f1f5f9 (옅은 회색-흰)
 
-// 다음 라운드(R3) 이전될 styles에서 사용 중. R3 끝나면 함께 제거.
-const GOLD_BTN_GRADIENT =
-  'linear-gradient(135deg, #fcd34d 0%, #C9962B 100%)'
-
-// styles 객체 — Day 7 R1·R2에서 welcome/header/sidebar/폴더 트리는 NewProjectView.module.css로 이전.
-// 잔여 키는 다음 라운드(R3~R4)에서 점진 이전 예정.
+// styles 객체 — Day 7 R1·R2·R3에서 welcome/header/sidebar/폴더 트리/메인 영역·사진 그리드는 NewProjectView.module.css로 이전.
+// 잔여 키는 다음 라운드(R4)에서 점진 이전 예정 (menu·modal·lightbox).
 const styles: Record<string, React.CSSProperties> = {
-  mainArea: {
-    flex: 1,
-    padding: 24,
-    overflowY: 'auto',
-    position: 'relative',
-  },
-  mainHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 12,
-    flexWrap: 'wrap',
-  },
-  mainHeaderLeft: { display: 'flex', alignItems: 'center', gap: 12 },
-  mainHeaderRight: { display: 'flex', alignItems: 'center', gap: 8 },
-  mainHeaderTitle: {
-    fontSize: 18,
-    color: '#f1f5f9',
-    margin: 0,
-    fontWeight: 700,
-  },
-  mainHeaderCount: { fontSize: 14, color: 'rgba(241, 245, 249, 0.55)' },
-  bigAddButton: {
-    fontSize: 16,
-    padding: '10px 20px',
-    background: GOLD_BTN_GRADIENT,
-    border: 'none',
-    borderRadius: 8,
-    cursor: 'pointer',
-    color: '#0F2540',
-    fontWeight: 700,
-    boxShadow: '0 4px 16px rgba(201, 150, 43, 0.25)',
-  },
-  emptyDropZone: {
-    border: '2px dashed rgba(255, 255, 255, 0.15)',
-    borderRadius: 12,
-    padding: 48,
-    textAlign: 'center',
-    background: 'rgba(255, 255, 255, 0.03)',
-  },
-  emptyDropTitle: {
-    fontSize: 18,
-    color: '#f1f5f9',
-    margin: '0 0 12px',
-    fontWeight: 600,
-  },
-  emptyDropHint: {
-    fontSize: 14,
-    color: 'rgba(241, 245, 249, 0.55)',
-    lineHeight: 1.6,
-    margin: 0,
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: 12,
-  },
-  photoCard: {
-    background: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 8,
-    overflow: 'hidden',
-    border: '1px solid rgba(255, 255, 255, 0.10)',
-    display: 'flex',
-    flexDirection: 'column',
-    cursor: 'pointer',
-    userSelect: 'none',
-    transition: 'box-shadow 0.1s, border-color 0.1s',
-  },
-  photoCardSelected: {
-    border: '2px solid #fcd34d',
-    boxShadow: '0 0 0 3px rgba(252, 211, 77, 0.32)',
-  },
-  photoThumbWrap: {
-    width: '100%',
-    aspectRatio: '1 / 1',
-    background: '#0a1628',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  photoImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  photoLoading: {
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.4)',
-  },
-  photoCaption: {
-    fontSize: 12,
-    color: 'rgba(241, 245, 249, 0.65)',
-    padding: '6px 8px',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  folderTagsList: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 4,
-    padding: '0 8px 8px',
-  },
-  folderTag: {
-    fontSize: 11,
-    background: 'rgba(252, 211, 77, 0.15)',
-    color: '#fef3c7',
-    padding: '2px 6px',
-    borderRadius: 4,
-    border: '1px solid rgba(252, 211, 77, 0.25)',
-    maxWidth: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  selectedBadge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    background: '#fcd34d',
-    color: '#0F2540',
-    width: 24,
-    height: 24,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 700,
-    fontSize: 14,
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.4)',
-    pointerEvents: 'none',
-  },
-  selectedCount: {
-    color: '#fcd34d',
-    fontWeight: 600,
-  },
-  statClassified: {
-    color: '#7FC97F',
-    fontWeight: 600,
-  },
-  statUnclassified: {
-    color: '#fcd34d',
-    fontWeight: 600,
-  },
-  toggleRow: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.85)',
-    cursor: 'pointer',
-    padding: '4px 10px',
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.10)',
-    borderRadius: 6,
-    userSelect: 'none',
-  },
-  spaceHint: {
-    fontSize: 13,
-    color: '#fef3c7',
-    background:
-      'linear-gradient(135deg, rgba(252, 211, 77, 0.15), rgba(252, 211, 77, 0.08))',
-    padding: '4px 10px',
-    borderRadius: 6,
-    border: '1px solid rgba(252, 211, 77, 0.30)',
-    fontWeight: 500,
-  },
-  rubberBand: {
-    position: 'absolute',
-    border: '1px dashed #fcd34d',
-    background: 'rgba(252, 211, 77, 0.12)',
-    pointerEvents: 'none',
-    zIndex: 5,
-  },
   menu: {
     position: 'fixed',
     background: '#0f2040',
