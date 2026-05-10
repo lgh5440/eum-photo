@@ -30,6 +30,11 @@ import {
 // 값 = JSON 배열(string[]) — 다중 선택 시 여러 fileName 한꺼번에.
 const DRAG_TYPE_FILENAMES = 'application/x-eum-photo-filenames'
 
+// CSS 모듈 클래스 합치기 helper. falsy 자동 제거.
+function cn(...classes: (string | false | null | undefined)[]): string {
+  return classes.filter(Boolean).join(' ')
+}
+
 // 라이트박스 zoom 단계 (작 → 큼)
 const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4] as const
 
@@ -1141,14 +1146,14 @@ export default function NewProjectView() {
         </div>
       </header>
 
-      <div style={styles.body}>
+      <div className={css.body}>
         {/* 좌측 — 폴더 트리 */}
-        <aside style={styles.sidebar}>
-          <div style={styles.sidebarSection}>
-            <h2 style={styles.sidebarTitle}>📁 인물 폴더</h2>
+        <aside className={css.sidebar}>
+          <div className={css.sidebarSection}>
+            <h2 className={css.sidebarTitle}>📁 인물 폴더</h2>
 
             {/* 폴더 만들기 */}
-            <div style={styles.newFolderRow}>
+            <div className={css.newFolderRow}>
               <input
                 ref={newFolderInputRef}
                 type="text"
@@ -1161,16 +1166,16 @@ export default function NewProjectView() {
                   }
                 }}
                 placeholder="새 폴더 이름 (예: 홍길동)"
-                style={styles.newFolderInput}
+                className={css.newFolderInput}
               />
-              <button type="button" style={styles.newFolderButton} onClick={() => void handleCreateFolder()}>
+              <button type="button" className={css.newFolderButton} onClick={() => void handleCreateFolder()}>
                 + 만들기
               </button>
             </div>
 
             {/* 폴더 트리 — 단순 평면 리스트 (인물 폴더 = 정리/<인물>) */}
             {sortedFolders.length === 0 ? (
-              <p style={styles.emptyHint}>
+              <p className={css.emptyHint}>
                 아직 폴더가 없어요.<br />
                 위 입력창에 학생 이름을 넣고 「만들기」를 눌러 보세요.
               </p>
@@ -1184,12 +1189,12 @@ export default function NewProjectView() {
                   return (
                     <div
                       key={key}
-                      style={{
-                        ...styles.folderRow,
-                        ...(isActive ? styles.folderRowActive : null),
-                        ...(isDrillIn ? styles.folderRowDrillIn : null),
-                        ...(isDropTarget ? styles.folderRowDropTarget : null),
-                      }}
+                      className={cn(
+                        css.folderRow,
+                        isActive && css.folderRowActive,
+                        isDrillIn && css.folderRowDrillIn,
+                        isDropTarget && css.folderRowDropTarget,
+                      )}
                       onClick={() => {
                         setActiveFolderKey(key)
                         setStatusMessage(
@@ -1209,7 +1214,7 @@ export default function NewProjectView() {
                       onDrop={handleFolderDrop(folder)}
                       title="클릭 = 폴더 선택 · 더블클릭 = 이 폴더 사진만 보기 · 사진 끌어다 놓기 = 분류 · 우클릭 = 메뉴"
                     >
-                      <span style={styles.folderIcon}>📁</span>
+                      <span className={css.folderIcon}>📁</span>
                       {renamingKey === key ? (
                         <input
                           autoFocus
@@ -1228,17 +1233,17 @@ export default function NewProjectView() {
                             }
                           }}
                           onBlur={() => void confirmRename()}
-                          style={styles.renameInput}
+                          className={css.renameInput}
                         />
                       ) : (
                         <>
-                          <span style={styles.folderName}>
-                            <span style={styles.folderNumber}>
+                          <span className={css.folderName}>
+                            <span className={css.folderNumber}>
                               {folderNumberMap.get(key)}.
                             </span>{' '}
                             {folder.name}
                           </span>
-                          <span style={styles.folderCount}>
+                          <span className={css.folderCount}>
                             {folderPhotoCount.get(getPersonFolderRelPath(folder)) ?? 0}
                           </span>
                         </>
@@ -1972,119 +1977,13 @@ function folderKey(f: PersonFolder): string {
 //   강조: 골드 (#fcd34d, #C9962B, #fef3c7)
 //   텍스트: #f1f5f9 (옅은 회색-흰)
 
-// 다음 라운드(R2) 이전될 styles에서 사용 중. R2 끝나면 함께 제거 + index.css :root 변수로 일원화.
+// 다음 라운드(R3) 이전될 styles에서 사용 중. R3 끝나면 함께 제거.
 const GOLD_BTN_GRADIENT =
   'linear-gradient(135deg, #fcd34d 0%, #C9962B 100%)'
 
-// styles 객체 — Day 7 R1에서 layout/welcome/header 부분은 NewProjectView.module.css로 이전.
-// 잔여 키는 다음 라운드(R2~R4)에서 점진 이전 예정.
+// styles 객체 — Day 7 R1·R2에서 welcome/header/sidebar/폴더 트리는 NewProjectView.module.css로 이전.
+// 잔여 키는 다음 라운드(R3~R4)에서 점진 이전 예정.
 const styles: Record<string, React.CSSProperties> = {
-  body: { flex: 1, display: 'flex', overflow: 'hidden' },
-  sidebar: {
-    width: 280,
-    minWidth: 280,
-    background: 'rgba(2, 8, 24, 0.55)',
-    borderRight: '1px solid rgba(252, 211, 77, 0.15)',
-    overflowY: 'auto',
-  },
-  sidebarSection: { padding: 16 },
-  sidebarTitle: {
-    fontSize: 16,
-    margin: '0 0 12px',
-    color: '#fcd34d',
-    fontWeight: 700,
-  },
-  newFolderRow: { display: 'flex', gap: 6, marginBottom: 16 },
-  newFolderInput: {
-    flex: 1,
-    minWidth: 0,
-    fontSize: 14,
-    padding: '8px 10px',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
-    borderRadius: 6,
-    background: 'rgba(255, 255, 255, 0.06)',
-    color: '#f1f5f9',
-    outline: 'none',
-  },
-  newFolderButton: {
-    fontSize: 14,
-    padding: '8px 12px',
-    background: GOLD_BTN_GRADIENT,
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-    color: '#0F2540',
-    fontWeight: 700,
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-  },
-  emptyHint: {
-    fontSize: 13,
-    color: 'rgba(241, 245, 249, 0.55)',
-    lineHeight: 1.6,
-    padding: '16px 8px',
-    background: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 8,
-    border: '1px dashed rgba(255, 255, 255, 0.15)',
-  },
-  statusGroup: { marginBottom: 12 },
-  statusGroupLabel: {
-    fontSize: 12,
-    color: 'rgba(241, 245, 249, 0.4)',
-    margin: '4px 0 4px 4px',
-  },
-  folderRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 10px',
-    borderRadius: 6,
-    cursor: 'pointer',
-    userSelect: 'none',
-    fontSize: 14,
-    color: '#f1f5f9',
-  },
-  folderRowActive: { background: 'rgba(252, 211, 77, 0.15)' },
-  folderRowDrillIn: {
-    background:
-      'linear-gradient(135deg, rgba(252, 211, 77, 0.30) 0%, rgba(201, 150, 43, 0.30) 100%)',
-    color: '#fef3c7',
-    fontWeight: 700,
-  },
-  folderRowDropTarget: {
-    background: 'rgba(127, 201, 127, 0.30)',
-    color: '#d1fae5',
-    fontWeight: 600,
-    outline: '2px solid #4FA64F',
-    outlineOffset: -2,
-  },
-  folderIcon: { fontSize: 16 },
-  folderName: {
-    flex: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  folderNumber: { color: '#fcd34d', fontWeight: 700 },
-  folderCount: {
-    fontSize: 12,
-    color: 'rgba(241, 245, 249, 0.6)',
-    fontWeight: 600,
-    fontVariantNumeric: 'tabular-nums',
-    minWidth: 24,
-    textAlign: 'right',
-    flexShrink: 0,
-  },
-  renameInput: {
-    flex: 1,
-    fontSize: 14,
-    padding: '4px 6px',
-    border: '1px solid #fcd34d',
-    borderRadius: 4,
-    background: 'rgba(2, 8, 24, 0.7)',
-    color: '#f1f5f9',
-    outline: 'none',
-  },
   mainArea: {
     flex: 1,
     padding: 24,

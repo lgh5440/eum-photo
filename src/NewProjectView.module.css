@@ -147,3 +147,138 @@
   cursor: pointer;
   color: var(--eum-text-muted);
 }
+
+/* ===== Body / Sidebar / 폴더 트리 (R2) ===== */
+
+.body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: rgba(2, 8, 24, 0.55);
+  border-right: 1px solid rgba(252, 211, 77, 0.15);
+  overflow-y: auto;
+}
+
+.sidebarSection {
+  padding: 16px;
+}
+
+.sidebarTitle {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: #fcd34d;
+  font-weight: 700;
+}
+
+.newFolderRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.newFolderInput {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: var(--eum-overlay-soft-2);
+  color: var(--eum-text-light);
+  outline: none;
+}
+
+.newFolderButton {
+  font-size: 14px;
+  padding: 8px 12px;
+  background: var(--eum-gold-btn-gradient);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0F2540;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.emptyHint {
+  font-size: 13px;
+  color: var(--eum-text-faint);
+  line-height: 1.6;
+  padding: 16px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.folderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: var(--eum-text-light);
+}
+
+.folderRowActive {
+  background: rgba(252, 211, 77, 0.15);
+}
+
+.folderRowDrillIn {
+  background: linear-gradient(135deg, rgba(252, 211, 77, 0.30) 0%, rgba(201, 150, 43, 0.30) 100%);
+  color: #fef3c7;
+  font-weight: 700;
+}
+
+.folderRowDropTarget {
+  background: rgba(127, 201, 127, 0.30);
+  color: #d1fae5;
+  font-weight: 600;
+  outline: 2px solid #4FA64F;
+  outline-offset: -2px;
+}
+
+.folderIcon {
+  font-size: 16px;
+}
+
+.folderName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folderNumber {
+  color: #fcd34d;
+  font-weight: 700;
+}
+
+.folderCount {
+  font-size: 12px;
+  color: rgba(241, 245, 249, 0.6);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.renameInput {
+  flex: 1;
+  font-size: 14px;
+  padding: 4px 6px;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  background: rgba(2, 8, 24, 0.7);
+  color: var(--eum-text-light);
+  outline: none;
+}
