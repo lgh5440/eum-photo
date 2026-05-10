@@ -207,7 +207,7 @@
 }
 
 .emptyHint {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--eum-text-faint);
   line-height: 1.6;
   padding: 16px 8px;
@@ -263,7 +263,7 @@
 }
 
 .folderCount {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(241, 245, 249, 0.6);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -400,12 +400,12 @@
 }
 
 .photoLoading {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(241, 245, 249, 0.4);
 }
 
 .photoCaption {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--eum-text-dim);
   padding: 6px 8px;
   overflow: hidden;
@@ -421,7 +421,7 @@
 }
 
 .folderTag {
-  font-size: 11px;
+  font-size: 14px;
   background: rgba(252, 211, 77, 0.15);
   color: #fef3c7;
   padding: 2px 6px;
@@ -470,7 +470,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--eum-text-muted);
   cursor: pointer;
   padding: 4px 10px;
@@ -481,7 +481,7 @@
 }
 
 .spaceHint {
-  font-size: 13px;
+  font-size: 14px;
   color: #fef3c7;
   background: linear-gradient(135deg, rgba(252, 211, 77, 0.15), rgba(252, 211, 77, 0.08));
   padding: 4px 10px;
@@ -537,7 +537,7 @@
 
 .menuHeader {
   padding: 8px 12px 6px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--eum-text-faint);
   border-bottom: 1px solid var(--eum-border-gold-soft);
   margin-bottom: 4px;
@@ -575,7 +575,7 @@
 }
 
 .modalHint {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(241, 245, 249, 0.7);
   margin: 0 0 16px;
   line-height: 1.5;
@@ -603,7 +603,7 @@
 }
 
 .modalPreviewLabel {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--eum-text-faint);
   margin-bottom: 8px;
 }
@@ -612,7 +612,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 14px;
   padding: 4px 0;
   font-family: monospace;
 }
@@ -668,7 +668,7 @@
 }
 
 .modalLabel {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(241, 245, 249, 0.7);
   margin-bottom: 8px;
   font-weight: 600;
@@ -683,7 +683,7 @@
 }
 
 .modalPreset {
-  font-size: 13px;
+  font-size: 14px;
   padding: 6px 12px;
   background: var(--eum-overlay-soft-2);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -694,7 +694,7 @@
 }
 
 .modalPresetActive {
-  font-size: 13px;
+  font-size: 14px;
   padding: 6px 12px;
   background: rgba(252, 211, 77, 0.20);
   border: 1px solid #fcd34d;
@@ -706,7 +706,7 @@
 }
 
 .modalNumberInput {
-  font-size: 13px;
+  font-size: 14px;
   padding: 6px 10px;
   width: 90px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -718,7 +718,7 @@
 }
 
 .modalUnit {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--eum-text-faint);
   margin-left: -2px;
 }
@@ -730,7 +730,7 @@
 }
 
 .modalProgress {
-  font-size: 13px;
+  font-size: 14px;
   color: #fcd34d;
   background: rgba(252, 211, 77, 0.10);
   border: 1px solid rgba(252, 211, 77, 0.30);
@@ -829,7 +829,7 @@
 }
 
 .lightboxInfo {
-  font-size: 13px;
+  font-size: 14px;
   color: #fef3c7;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -910,7 +910,7 @@
 }
 
 .lightboxFolderName {
-  font-size: 11px;
+  font-size: 14px;
   color: #fef3c7;
   max-width: 80px;
   overflow: hidden;
@@ -919,7 +919,7 @@
 }
 
 .lightboxFolderCheck {
-  font-size: 13px;
+  font-size: 14px;
   color: #7FC97F;
   font-weight: 700;
   margin-top: 2px;

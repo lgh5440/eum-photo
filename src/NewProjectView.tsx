@@ -35,6 +35,14 @@ function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(' ')
 }
 
+// 에러 다이얼로그 표준 — 「원인 + 다음 행동」 형태.
+//   action 생략 시 일반적인 안내. 호출자가 컨텍스트 알 때 구체적 다음 행동 전달.
+function showError(err: unknown, action?: string): void {
+  const reason = err instanceof Error ? err.message : String(err)
+  const tail = action ? `\n\n💡 ${action}` : '\n\n💡 같은 작업을 다시 시도하거나, 폴더·사진 이름이 충돌하지 않는지 확인해 주세요.'
+  window.alert(`⚠️ 작업 중 문제가 생겼어요.\n\n원인: ${reason}${tail}`)
+}
+
 // 라이트박스 zoom 단계 (작 → 큼)
 const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4] as const
 
@@ -180,7 +188,7 @@ export default function NewProjectView() {
       }
       return true
     } catch (err) {
-      window.alert(`작업 폴더 불러오기에 실패했어요:\n${err instanceof Error ? err.message : String(err)}`)
+      showError(err, '선택한 폴더의 권한을 확인하거나, 디스크가 마운트되어 있는지 확인해 주세요.')
       setScreen('no-folder')
       return false
     }
@@ -243,7 +251,7 @@ export default function NewProjectView() {
       setStatusMessage(`「${name}」 폴더를 만들었어요.`)
       newFolderInputRef.current?.focus()
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : String(err))
+      showError(err)
     }
   }, [meta, newFolderName])
 
@@ -267,7 +275,7 @@ export default function NewProjectView() {
         }
         setStatusMessage(`「${folder.name}」 폴더를 지웠어요.`)
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : String(err))
+        showError(err)
       }
     },
     [meta, activeFolderKey, drillInKey],
@@ -299,7 +307,7 @@ export default function NewProjectView() {
       setMeta(next)
       setStatusMessage(`「${folder.name}」을 「${newName}」(으)로 바꿨어요.`)
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : String(err))
+      showError(err)
     }
   }, [meta, renamingKey, renameValue])
 
@@ -324,7 +332,7 @@ export default function NewProjectView() {
           setStatusMessage(`사진 ${added}장을 「원본/」에 추가했어요.`)
         }
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : String(err))
+        showError(err)
       } finally {
         setIsAdding(false)
         setAddProgress('')
@@ -523,7 +531,7 @@ export default function NewProjectView() {
         setMeta(next)
         setStatusMessage(`「${fileName}」을 「${folder.name}」 폴더에서 뺐어요.`)
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : String(err))
+        showError(err)
       }
     },
     [meta],
@@ -934,7 +942,7 @@ export default function NewProjectView() {
           setStatusMessage(`「${folderLabel}」에 추가했어요.`)
         }
       } catch (err) {
-        window.alert(err instanceof Error ? err.message : String(err))
+        showError(err)
       }
     },
     [meta, lightboxName, folderNumberMap],
