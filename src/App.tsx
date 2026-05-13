@@ -4896,6 +4896,23 @@ function App() {
           </div>
         )
       })()}
+
+      <footer
+        style={{
+          textAlign: 'center',
+          margin: '24px auto 32px',
+          fontSize: 12,
+          opacity: 0.6,
+        }}
+      >
+        오류 신고 · 문의 :{' '}
+        <a
+          href="mailto:lgh544092@gmail.com?subject=%5B%EC%9D%B4%EC%9D%8C%20%ED%8F%AC%ED%86%A0%5D%20%EB%AC%B8%EC%9D%98%C2%B7%EC%98%A4%EB%A5%98%20%EC%A0%9C%EB%B3%B4"
+          style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 4 }}
+        >
+          lgh544092@gmail.com
+        </a>
+      </footer>
     </main>
   )
 }
