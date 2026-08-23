@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>이음 포토 — 교회학교 사진 정리 도구</title>
+<link rel="icon" type="image/png" href="./eum-logo.png" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta name="description" content="이음 포토 - 교회학교 사진을 사용자 컴퓨터 안에서 정리하는 로컬 우선 도구" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="이음 포토" />
+<meta property="og:title" content="이음 포토 — 교회학교 사진 정리 도구" />
+<meta property="og:description" content="사진을 인물 폴더로 자유롭게 분류. 100% 로컬 처리, 인터넷·클라우드 없음." />
+<meta property="og:image" content="./og.png" />
+<style>
+  :root{
+    --navy:#1B3A5C; --navy-d:#122942; --blue:#2F73F2; --blue-d:#1F5FD9;
+    --paper:#F5F8FC; --ink:#182349; --muted:#5C6A93; --line:#D7E5FA;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; min-height:100%; font-family:'PretendardVariable','Pretendard',-apple-system,sans-serif;
+    background:var(--paper); color:var(--ink);
+  }
+  .hero{
+    background:linear-gradient(165deg, var(--navy), var(--navy-d));
+    color:#fff; padding:64px 20px 56px; text-align:center;
+  }
+  .hero img{ width:84px; height:84px; border-radius:22px; box-shadow:0 14px 28px -10px rgba(0,0,0,.4); }
+  .hero h1{ margin:20px 0 0; font-size:30px; font-weight:800; letter-spacing:-.01em; }
+  .hero p{ margin:12px auto 0; max-width:38ch; font-size:15px; line-height:1.6; color:#C9D6EE; }
+  .badges{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+  .badge{ font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; background:rgba(255,255,255,.12); color:#fff; }
+
+  .wrap{ max-width:640px; margin:0 auto; padding:0 20px; }
+
+  .dl{
+    display:block; max-width:420px; margin:-28px auto 0; position:relative; z-index:2;
+    background:#fff; border-radius:20px; padding:26px 26px 24px; text-align:center;
+    box-shadow:0 24px 48px -20px rgba(24,35,73,.35); border:1px solid var(--line);
+  }
+  .dl .btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:16px 20px; border-radius:14px; border:none; cursor:pointer; text-decoration:none;
+    background:linear-gradient(135deg, var(--blue), var(--blue-d)); color:#fff;
+    font-size:16px; font-weight:700; box-shadow:0 14px 26px -12px rgba(47,115,242,.55);
+  }
+  .dl .btn:hover{ filter:brightness(1.05); }
+  .dl .meta{ margin-top:10px; font-size:12px; color:var(--muted); }
+  .dl .note{ margin-top:14px; font-size:12.5px; line-height:1.6; color:var(--muted); }
+
+  section{ padding:40px 0; }
+  h2{ font-size:19px; font-weight:800; margin:0 0 16px; }
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:480px){ .cards{ grid-template-columns:1fr; } }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; }
+  .card b{ display:block; font-size:14.5px; margin-bottom:6px; }
+  .card p{ margin:0; font-size:13px; line-height:1.6; color:var(--muted); }
+
+  .who ul{ margin:0; padding-left:20px; }
+  .who li{ font-size:14px; line-height:1.9; color:var(--ink); }
+
+  .limits{ background:#FFF8EE; border:1px solid #F3DFB8; border-radius:16px; padding:18px 20px; }
+  .limits b{ display:block; margin-bottom:8px; color:#8A5A00; }
+  .limits ul{ margin:0; padding-left:20px; }
+  .limits li{ font-size:13px; line-height:1.8; color:#6B5330; }
+
+  footer{ text-align:center; padding:36px 20px 50px; font-size:12px; color:var(--muted); }
+  footer a{ color:var(--blue-d); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <img src="./eum-logo.png" alt="이음 포토">
+    <h1>이음 포토</h1>
+    <p>평범한 교사를 위한 사진 정리 도구.<br>100% 로컬에서 처리합니다 — 인터넷·클라우드 없이.</p>
+    <div class="badges">
+      <span class="badge">Windows 10/11</span>
+      <span class="badge">100% 로컬</span>
+      <span class="badge">알파 v0.1.0</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="dl">
+      <a class="btn" href="https://github.com/lgh5440/eum-photo/releases/download/v0.1.0/Setup.0.1.0.exe">
+        ⬇ 이음 포토 다운로드 (Windows)
+      </a>
+      <p class="meta">v0.1.0 · 약 85MB · Setup.0.1.0.exe</p>
+      <p class="note">⚠️ 코드 서명 전 알파 버전이라 실행 시 SmartScreen 경고가 뜰 수 있습니다. "추가 정보 → 실행"을 눌러주세요.</p>
+    </div>
+
+    <section>
+      <h2>이런 분께 좋습니다</h2>
+      <div class="who">
+        <ul>
+          <li>매주·매월 행사 사진을 인물별로 정리해야 하는 교사·교회학교 봉사자</li>
+          <li>학생 사진을 외부 클라우드에 올리지 않고 본인 PC에만 두고 싶은 분</li>
+          <li>60대 이상, 컴퓨터가 익숙하지 않아도 큰 버튼·한국어 메시지로 바로 쓸 수 있어요</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>주요 기능</h2>
+      <div class="cards">
+        <div class="card"><b>인물별 폴더 분류</b><p>사진을 인물 폴더로 드래그만 하면 정리 끝. 원본은 항상 보존됩니다.</p></div>
+        <div class="card"><b>다중 선택</b><p>Ctrl·Shift·드래그 박스로 여러 장을 한 번에 선택·분류.</p></div>
+        <div class="card"><b>라이트박스</b><p>사진을 크게 보고 ←/→ 로 넘기며, 그 자리에서 바로 분류.</p></div>
+        <div class="card"><b>영구 작업 폴더</b><p>한 번 정해두면 다음에 켜도 자동으로 이어서 작업.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>알려진 한계 (정직하게 말씀드립니다)</h2>
+      <div class="limits">
+        <b>아직 안 되는 것</b>
+        <ul>
+          <li>단체사진 자동 인식 — 지금은 수동 분류만 가능</li>
+          <li>학생 명단 CSV·동의 매칭 — 다음 버전 예정</li>
+          <li>자동 업데이트 — 새 버전은 이 페이지에서 직접 다시 받아야 함</li>
+          <li>macOS·Linux 미지원 — Windows 전용</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    이음(E:UM) 패밀리 도구 · <a href="https://github.com/lgh5440/eum-photo">GitHub</a> · 문의는 이슈로 남겨주세요
+  </footer>
+
+</body>
+</html>
