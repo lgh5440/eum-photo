@@ -27,9 +27,11 @@
   /* ★재작업(2026-09-01, 오너 육안 피드백 — eum-card 기준 적용): 히어로가 진한 남색(--navy) 큰
      배경 덩어리였던 것을 흰/옅은 블루 배경 + 블루 포인트로 전환. 큰 면적을 진한 색으로 채우지 않는다. */
   .hero{
-    background:linear-gradient(165deg, var(--paper), var(--line));
-    color:var(--ink); padding:64px 20px 56px; text-align:center;
-    border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg, #FF9AD8, #FFD98C, #8CC7FF, #18DDEB, #B98CFF);
+    color:var(--ink); padding:3px; text-align:center;
+  }
+  .hero-inner{
+    background:#fff; border-radius:calc(22px - 3px); padding:64px 20px 56px;
   }
   .hero img{ width:84px; height:84px; border-radius:22px; box-shadow:0 14px 28px -10px rgba(24,35,73,.25); }
   .hero h1{ margin:20px 0 0; font-size:30px; font-weight:800; letter-spacing:-.01em; color:var(--ink); }
@@ -77,6 +79,7 @@
 <body>
 
   <div class="hero">
+    <div class="hero-inner">
     <img src="./eum-logo.png" alt="이음 포토">
     <h1>이음 포토</h1>
     <p>평범한 교사를 위한 사진 정리 도구.<br>100% 로컬에서 처리합니다 — 인터넷·클라우드 없이.</p>
@@ -85,6 +88,7 @@
       <span class="badge">100% 로컬</span>
       <span class="badge">알파 v0.1.0</span>
     </div>
+  </div>
   </div>
 
   <div class="wrap">

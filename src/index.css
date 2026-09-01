@@ -1,13 +1,13 @@
 :root {
   /* EUM 브랜드 컬러 (이음) — k-trader-web/eumBrand 와 통일 */
-  --eum-orange: #F08C28;
-  --eum-orange-d: #D87515;
-  --eum-orange-l: #FFB870;
+  --eum-orange: #1F5FD9;
+  --eum-orange-d: #17439C;
+  --eum-orange-l: #6FA7FF;
   --eum-navy: #1B3A5C;
   --eum-navy-d: #0F2540;
   --eum-cream: #FFF8EC;
-  --eum-gold: #C9962B;
-  --eum-gold-l: #F0BC78;
+  --eum-gold: #1F5FD9;
+  --eum-gold-l: #6FA7FF;
 
   font-family:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,

@@ -114,7 +114,7 @@ button:disabled {
 .primary-action {
   width: 100%;
   color: #172033;
-  background: #f9d56f;
+  background: #2F73F2;
 }
 
 .secondary-action {
@@ -172,7 +172,7 @@ button:disabled {
   border-radius: 999px;
   padding: 0 10px;
   background: rgba(249, 213, 111, 0.16);
-  color: #f9d56f;
+  color: #2F73F2;
   border: 1px solid rgba(249, 213, 111, 0.28);
   font-size: 12px;
   font-weight: 900;
@@ -386,7 +386,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.1);
-  color: #f9d56f;
+  color: #2F73F2;
   font-size: 11px;
   font-weight: 900;
 }
@@ -473,7 +473,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
   font-size: 11px;
 }
@@ -759,9 +759,9 @@ h1 {
   width: auto;
   padding: 0 14px;
   min-height: 34px;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
   font-size: 13px;
   font-weight: 900;
 }
@@ -773,9 +773,9 @@ h1 {
 .top-actions .result-action {
   padding: 0 14px;
   min-height: 34px;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
   font-size: 13px;
   font-weight: 900;
 }
@@ -843,7 +843,7 @@ h1 {
 }
 
 .workflow-step-active .workflow-step-num {
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
 }
 
@@ -941,7 +941,7 @@ h1 {
 
 .result-card.primary {
   background: #fff8eb;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
 }
 
 .result-card.primary:hover:not(:disabled) {
@@ -1011,7 +1011,7 @@ h1 {
   width: auto;
   height: 36px;
   background: #fff;
-  border: 1px solid #f9d56f;
+  border: 1px solid #2F73F2;
   color: #92400e;
   font-weight: 900;
   padding: 0 14px;
@@ -1023,7 +1023,7 @@ h1 {
 }
 
 .single-mode-toggle.active {
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
 }
 
@@ -1153,7 +1153,7 @@ h1 {
 
 .single-mode-roster button:hover:not(:disabled) {
   background: #fff8eb;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
 }
 
 .single-mode-roster button:disabled {
@@ -1263,7 +1263,7 @@ h1 {
 
 .single-mode-actions-secondary button:hover {
   background: #fff8eb;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
 }
 
 .single-mode-nav {
@@ -1665,7 +1665,7 @@ h1 {
 }
 
 .metrics-simple-warn {
-  color: #b45309;
+  color: #1F5FD9;
   margin-left: auto;
   font-weight: 800;
 }
@@ -1885,7 +1885,7 @@ h1 {
 .dropzone button {
   padding: 0 18px;
   color: #172033;
-  background: #f9d56f;
+  background: #2F73F2;
 }
 
 .dropzone-steps {
@@ -1920,7 +1920,7 @@ h1 {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
   font-weight: 900;
   font-size: 13px;
@@ -2236,7 +2236,7 @@ h1 {
 }
 
 .photo-card.active {
-  outline: 2px solid #f9d56f;
+  outline: 2px solid #2F73F2;
   outline-offset: -3px;
 }
 
@@ -2263,7 +2263,7 @@ h1 {
   top: 6px;
   left: 6px;
   padding: 3px 8px;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
   border-radius: 999px;
   font-size: 11px;
@@ -2468,7 +2468,7 @@ h1 {
   border-color: #172033;
 }
 
-/* 작업 폴더 표시 — 텍스트 형식 (button 아님). EUM 브랜드 톤 (cream + navy + orange) */
+/* 작업 폴더 표시 — 텍스트 형식 (button 아님). EUM 브랜드 톤 (white + ink + blue) */
 .plan-work-folder {
   display: flex;
   flex-direction: column;
@@ -2476,7 +2476,7 @@ h1 {
   margin: 6px 12px 0;
   padding: 10px 14px;
   background: #FFF8EC;
-  border-left: 3px solid #F08C28;
+  border-left: 3px solid #1F5FD9;
   border-radius: 6px;
   text-align: left;
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
@@ -2514,9 +2514,9 @@ h1 {
 .plan-folder-create button {
   padding: 0 12px;
   border-radius: 6px;
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
-  border: 1px solid #f9d56f;
+  border: 1px solid #2F73F2;
   font-weight: 900;
   cursor: pointer;
 }
@@ -2834,7 +2834,7 @@ h1 {
 
 .folder-tree-row.drop-active {
   background: #fff8eb;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
   border-style: dashed;
   box-shadow: 0 0 0 2px rgba(249, 213, 111, 0.4);
 }
@@ -2916,7 +2916,7 @@ h1 {
 
 .board-drill-header.candidates {
   background: #fff8eb;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
 }
 
 .board-drill-header.candidates strong {
@@ -2929,7 +2929,7 @@ h1 {
 
 .filter-toggle.active {
   background: #fff8eb !important;
-  border-color: #f9d56f !important;
+  border-color: #2F73F2 !important;
   color: #92400e !important;
   font-weight: 900;
 }
@@ -2968,8 +2968,8 @@ h1 {
 }
 
 .person-summary button:hover {
-  background: #f9d56f;
-  border-color: #f9d56f;
+  background: #2F73F2;
+  border-color: #2F73F2;
   color: #172033;
 }
 
@@ -3105,7 +3105,7 @@ h1 {
 }
 
 .viewer-actions .viewer-close {
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
   font-weight: 900;
   border-color: rgba(249, 213, 111, 0.6);
@@ -3130,9 +3130,9 @@ h1 {
 
 .viewer-actions button.active,
 .viewer-footer button.active {
-  background: #f9d56f;
+  background: #2F73F2;
   color: #172033;
-  border-color: #f9d56f;
+  border-color: #2F73F2;
 }
 
 .viewer-body {
@@ -3166,7 +3166,7 @@ h1 {
   border-radius: 8px;
   background: rgba(249, 213, 111, 0.18);
   color: #fff;
-  border: 2px solid #f9d56f;
+  border: 2px solid #2F73F2;
   box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.42);
   display: grid;
   place-items: start end;
@@ -3198,7 +3198,7 @@ h1 {
 }
 
 .viewer-face-tools span {
-  color: #f9d56f;
+  color: #2F73F2;
   font-size: 12px;
   font-weight: 900;
 }
@@ -3259,7 +3259,7 @@ h1 {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: #f9d56f;
+    background: #2F73F2;
     color: #172033;
     border: 0;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
