@@ -752,7 +752,7 @@ h1 {
 }
 
 .top-actions .undo-action-floating:hover {
-  background: #1e3a8a;
+  background: #1F5FD9;
 }
 
 .top-actions .primary-action {
@@ -1129,7 +1129,7 @@ h1 {
   min-height: 24px;
   border-radius: 999px;
   background: #dbeafe;
-  color: #1e3a8a;
+  color: #1F5FD9;
   font-size: 12px;
   font-weight: 800;
 }
@@ -2485,14 +2485,14 @@ h1 {
 .plan-work-folder-label {
   font-size: 11px;
   font-weight: 700;
-  color: #1B3A5C;
+  color: #101A3D;
   letter-spacing: 0.02em;
 }
 
 .plan-work-folder-name {
   font-size: 13px;
   font-weight: 600;
-  color: #0F2540;
+  color: #101A3D;
   word-break: break-all;
   line-height: 1.4;
 }
@@ -2700,7 +2700,7 @@ h1 {
   display: block;
   margin-bottom: 4px;
   font-size: 13px;
-  color: #1e3a8a;
+  color: #1F5FD9;
 }
 
 .plan-roster-msg {
@@ -2718,7 +2718,7 @@ h1 {
 .plan-roster .roster-chip-list button,
 .plan-roster .roster-chip-list span {
   background: rgba(59, 130, 246, 0.1);
-  color: #1e3a8a;
+  color: #1F5FD9;
   border-color: #bfdbfe;
 }
 
@@ -3142,7 +3142,7 @@ h1 {
   background:
     linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
-    #0b1220;
+    #F8FBFF;
   background-size: 24px 24px;
   padding: 18px;
 }
