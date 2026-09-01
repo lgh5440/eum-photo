@@ -2,7 +2,7 @@
   min-height: 100svh;
   display: block;
   background: #f7f8fb;
-  color: #172033;
+  color: #101A3D;
 }
 
 img {
@@ -15,7 +15,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid #2563eb;
+  outline: 3px solid #2F73F2;
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -34,8 +34,8 @@ textarea:focus-visible,
 .sidebar {
   min-height: 100svh;
   padding: 22px;
-  background: #101827;
-  color: #f8fafc;
+  background: #FFFFFF;
+  color: #101A3D;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -113,7 +113,7 @@ button:disabled {
 
 .primary-action {
   width: 100%;
-  color: #172033;
+  color: #101A3D;
   background: #2F73F2;
 }
 
@@ -474,7 +474,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   font-size: 11px;
 }
 
@@ -647,7 +647,7 @@ button:disabled {
 
 h1 {
   margin: 0;
-  color: #111827;
+  color: #101A3D;
   font-size: 22px;
   line-height: 1.2;
   word-break: keep-all;
@@ -686,7 +686,7 @@ h1 {
 
 .top-actions button {
   padding: 0 11px;
-  color: #172033;
+  color: #101A3D;
   background: #fff;
   border: 1px solid #dbe3ef;
 }
@@ -714,7 +714,7 @@ h1 {
 
 .top-actions .plan-back-action:hover:not(:disabled) {
   background: #eef4ff;
-  color: #1e40af;
+  color: #2F73F2;
   border-color: #bfdbfe;
 }
 
@@ -724,7 +724,7 @@ h1 {
 }
 
 .top-actions .undo-action {
-  color: #1e40af;
+  color: #2F73F2;
   background: #eff6ff;
   border-color: #bfdbfe;
   font-weight: 900;
@@ -741,7 +741,7 @@ h1 {
   transform: translateX(-50%);
   z-index: 70;
   padding: 10px 18px;
-  background: #1e40af;
+  background: #2F73F2;
   color: #fff;
   border: 0;
   border-radius: 999px;
@@ -760,7 +760,7 @@ h1 {
   padding: 0 14px;
   min-height: 34px;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   border-color: #2F73F2;
   font-size: 13px;
   font-weight: 900;
@@ -774,7 +774,7 @@ h1 {
   padding: 0 14px;
   min-height: 34px;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   border-color: #2F73F2;
   font-size: 13px;
   font-weight: 900;
@@ -814,7 +814,7 @@ h1 {
 .workflow-step strong {
   font-size: 12px;
   font-weight: 900;
-  color: #172033;
+  color: #101A3D;
 }
 
 .workflow-step small {
@@ -844,7 +844,7 @@ h1 {
 
 .workflow-step-active .workflow-step-num {
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
 }
 
 .workflow-step-done .workflow-step-num {
@@ -891,7 +891,7 @@ h1 {
 .result-modal header h2 {
   margin: 0 0 6px;
   font-size: 20px;
-  color: #111827;
+  color: #101A3D;
 }
 
 .result-modal header p {
@@ -936,7 +936,7 @@ h1 {
 
 .result-card:hover:not(:disabled) {
   background: #eef4ff;
-  border-color: #5673a5;
+  border-color: #6FA7FF;
 }
 
 .result-card.primary {
@@ -949,7 +949,7 @@ h1 {
 }
 
 .result-card svg {
-  color: #5673a5;
+  color: #6FA7FF;
 }
 
 .result-card.primary svg {
@@ -960,7 +960,7 @@ h1 {
   display: block;
   font-size: 16px;
   font-weight: 900;
-  color: #111827;
+  color: #101A3D;
 }
 
 .result-card p {
@@ -989,7 +989,7 @@ h1 {
 }
 
 .result-modal-extra strong {
-  color: #172033;
+  color: #101A3D;
 }
 
 .result-modal-extra button {
@@ -997,7 +997,7 @@ h1 {
   border-radius: 6px;
   border: 1px solid #dbe3ef;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-size: 11px;
   font-weight: 900;
   cursor: pointer;
@@ -1024,7 +1024,7 @@ h1 {
 
 .single-mode-toggle.active {
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
 }
 
 .single-mode-stage {
@@ -1042,7 +1042,7 @@ h1 {
 
 .single-mode-progress strong {
   font-size: 16px;
-  color: #172033;
+  color: #101A3D;
 }
 
 .single-mode-progress-bar {
@@ -1054,7 +1054,7 @@ h1 {
 
 .single-mode-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #5673a5, #34d399);
+  background: linear-gradient(90deg, #6FA7FF, #34d399);
   transition: width 0.2s ease;
 }
 
@@ -1062,7 +1062,7 @@ h1 {
   position: relative;
   display: grid;
   place-items: center;
-  background: #0f172a;
+  background: #F8FBFF;
   border-radius: 12px;
   min-height: 320px;
   max-height: 60vh;
@@ -1112,7 +1112,7 @@ h1 {
   display: block;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #172033;
+  color: #101A3D;
 }
 
 .single-mode-current-tags {
@@ -1145,7 +1145,7 @@ h1 {
   border-radius: 999px;
   border: 1px solid #cbd5e1;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-weight: 800;
   cursor: pointer;
   font-size: 13px;
@@ -1205,7 +1205,7 @@ h1 {
 
 .single-mode-actions button span {
   font-size: 18px;
-  color: #111827;
+  color: #101A3D;
 }
 
 .single-mode-actions button small {
@@ -1255,7 +1255,7 @@ h1 {
   border-radius: 10px;
   border: 1px solid #dbe3ef;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-weight: 900;
   cursor: pointer;
   font-size: 14px;
@@ -1314,7 +1314,7 @@ h1 {
 }
 
 .dropdown-trigger.open {
-  border-color: #5673a5;
+  border-color: #6FA7FF;
   background: #eef4ff;
 }
 
@@ -1342,7 +1342,7 @@ h1 {
   padding: 8px 10px;
   border: 0;
   background: transparent;
-  color: #172033;
+  color: #101A3D;
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
@@ -1356,7 +1356,7 @@ h1 {
   display: block;
   font-size: 13px;
   font-weight: 900;
-  color: #111827;
+  color: #101A3D;
   line-height: 1.2;
 }
 
@@ -1376,9 +1376,9 @@ h1 {
   max-width: 360px;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #1e3a5f;
+  background: #F5F8FC;
   color: #fff;
-  border: 1px solid #1e3a5f;
+  border: 1px solid #DDEEFF;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
   font-size: 13px;
   font-weight: 700;
@@ -1544,7 +1544,7 @@ h1 {
 .metrics-thin-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #5673a5, #34d399);
+  background: linear-gradient(90deg, #6FA7FF, #34d399);
   transition: width 0.2s ease;
 }
 
@@ -1645,12 +1645,12 @@ h1 {
 }
 
 .metrics-simple-line svg {
-  color: #5673a5;
+  color: #6FA7FF;
   margin-right: 4px;
 }
 
 .metrics-simple-line strong {
-  color: #111827;
+  color: #101A3D;
   font-size: 18px;
   font-weight: 900;
 }
@@ -1681,7 +1681,7 @@ h1 {
 .metrics-simple-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #5673a5, #34d399);
+  background: linear-gradient(90deg, #6FA7FF, #34d399);
   transition: width 0.2s ease;
 }
 
@@ -1716,7 +1716,7 @@ h1 {
 .metric-progress-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #5673a5, #34d399);
+  background: linear-gradient(90deg, #6FA7FF, #34d399);
   transition: width 0.2s ease;
 }
 
@@ -1741,11 +1741,11 @@ h1 {
 }
 
 .metrics svg {
-  color: #5673a5;
+  color: #6FA7FF;
 }
 
 .metrics strong {
-  color: #111827;
+  color: #101A3D;
   font-size: 24px;
   line-height: 1;
 }
@@ -1802,7 +1802,7 @@ h1 {
 .recent-work-folder strong {
   display: block;
   margin-bottom: 4px;
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
   font-weight: 900;
 }
@@ -1857,14 +1857,14 @@ h1 {
   padding: 0 12px;
   border-radius: 7px;
   border: 1px solid #dbe3ef;
-  background: #172033;
+  background: #1F5FD9;
   color: #fff;
   font-size: 13px;
   font-weight: 900;
 }
 
 .recent-work-folder-actions button:hover:not(:disabled) {
-  background: #0f172a;
+  background: #F8FBFF;
 }
 
 .recent-work-folder-actions button:disabled {
@@ -1884,7 +1884,7 @@ h1 {
 
 .dropzone button {
   padding: 0 18px;
-  color: #172033;
+  color: #101A3D;
   background: #2F73F2;
 }
 
@@ -1921,7 +1921,7 @@ h1 {
   height: 26px;
   border-radius: 50%;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   font-weight: 900;
   font-size: 13px;
 }
@@ -1988,7 +1988,7 @@ h1 {
   padding: 8px 12px;
   border-radius: 6px;
   background: #eef4ff;
-  color: #1e40af;
+  color: #2F73F2;
   border: 1px solid #bfdbfe;
   font-size: 13px;
   font-weight: 800;
@@ -2114,7 +2114,7 @@ h1 {
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-size: 12px;
   font-weight: 800;
   outline: none;
@@ -2176,7 +2176,7 @@ h1 {
   background: #fff;
   border: 1px solid #dbe3ef;
   border-radius: 5px;
-  color: #172033;
+  color: #101A3D;
   padding: 0;
   font-size: 16px;
   font-weight: 900;
@@ -2231,7 +2231,7 @@ h1 {
 }
 
 .photo-card.selected {
-  border-color: #2f6feb;
+  border-color: #2F73F2;
   box-shadow: 0 0 0 2px rgba(47, 111, 235, 0.25);
 }
 
@@ -2249,7 +2249,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #2f6feb;
+  background: #2F73F2;
   color: #fff;
   border-radius: 50%;
   font-size: 14px;
@@ -2264,7 +2264,7 @@ h1 {
   left: 6px;
   padding: 3px 8px;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 900;
@@ -2326,7 +2326,7 @@ h1 {
 
 .photo-info strong {
   overflow: hidden;
-  color: #111827;
+  color: #101A3D;
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2463,9 +2463,9 @@ h1 {
 }
 
 .quick-status button.active {
-  background: #172033;
+  background: #1F5FD9;
   color: #fff;
-  border-color: #172033;
+  border-color: #1F5FD9;
 }
 
 /* 작업 폴더 표시 — 텍스트 형식 (button 아님). EUM 브랜드 톤 (white + ink + blue) */
@@ -2515,7 +2515,7 @@ h1 {
   padding: 0 12px;
   border-radius: 6px;
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   border: 1px solid #2F73F2;
   font-weight: 900;
   cursor: pointer;
@@ -2563,7 +2563,7 @@ h1 {
   display: block;
   font-size: 14px;
   font-weight: 900;
-  color: #111827;
+  color: #101A3D;
   margin-bottom: 4px;
 }
 
@@ -2587,7 +2587,7 @@ h1 {
   border-radius: 7px;
   border: 1px solid #cbd5e1;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
@@ -2595,7 +2595,7 @@ h1 {
 
 .settings-row-actions button:hover {
   background: #eef4ff;
-  border-color: #1e40af;
+  border-color: #2F73F2;
 }
 
 .settings-row-actions button.folder-context-danger {
@@ -2614,7 +2614,7 @@ h1 {
   gap: 6px;
   font-size: 13px;
   font-weight: 700;
-  color: #172033;
+  color: #101A3D;
   cursor: pointer;
 }
 
@@ -2624,7 +2624,7 @@ h1 {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   border-radius: 8px;
-  color: #1e40af;
+  color: #2F73F2;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
@@ -2635,7 +2635,7 @@ h1 {
   background: none;
   border: 0;
   padding: 0;
-  color: #1e40af;
+  color: #2F73F2;
   font-size: 12px;
   font-weight: 800;
   text-decoration: underline;
@@ -2662,7 +2662,7 @@ h1 {
   background: transparent;
   border: 0;
   border-radius: 5px;
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
   font-weight: 700;
   text-align: left;
@@ -2671,7 +2671,7 @@ h1 {
 
 .folder-context-menu button:hover:not(:disabled) {
   background: #eef4ff;
-  color: #1e40af;
+  color: #2F73F2;
 }
 
 .folder-context-menu button:disabled {
@@ -2768,7 +2768,7 @@ h1 {
 }
 
 .plan-event-header strong {
-  color: #111827;
+  color: #101A3D;
   font-size: 14px;
   font-weight: 900;
 }
@@ -2794,7 +2794,7 @@ h1 {
   border-radius: 6px;
   border: 1px solid transparent;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -2819,7 +2819,7 @@ h1 {
 
 .folder-tree-toggle:hover {
   background: #e2e8f0;
-  color: #172033;
+  color: #101A3D;
 }
 
 .folder-tree-toggle-spacer {
@@ -2841,8 +2841,8 @@ h1 {
 
 .folder-tree-row.active {
   background: #eff6ff;
-  border-color: #1e40af;
-  box-shadow: inset 3px 0 0 #1e40af;
+  border-color: #2F73F2;
+  box-shadow: inset 3px 0 0 #2F73F2;
 }
 
 .folder-tree-row.active:hover {
@@ -2903,7 +2903,7 @@ h1 {
 }
 
 .board-drill-header strong {
-  color: #172033;
+  color: #101A3D;
   font-size: 14px;
   font-weight: 900;
 }
@@ -2947,7 +2947,7 @@ h1 {
 
 .person-summary strong {
   width: 100%;
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
 }
 
@@ -2970,7 +2970,7 @@ h1 {
 .person-summary button:hover {
   background: #2F73F2;
   border-color: #2F73F2;
-  color: #172033;
+  color: #101A3D;
 }
 
 .review-panel {
@@ -2984,7 +2984,7 @@ h1 {
 }
 
 .review-panel > strong {
-  color: #172033;
+  color: #101A3D;
   font-size: 13px;
 }
 
@@ -2993,7 +2993,7 @@ h1 {
   padding: 9px;
   border-radius: 8px;
   background: #fff;
-  color: #172033;
+  color: #101A3D;
   border: 1px solid #fed7aa;
   text-align: left;
   cursor: pointer;
@@ -3045,8 +3045,8 @@ h1 {
   height: min(860px, calc(100svh - 44px));
   border-radius: 8px;
   overflow: hidden;
-  background: #0f172a;
-  color: #f8fafc;
+  background: #F8FBFF;
+  color: #101A3D;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -3061,7 +3061,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #111827;
+  background: #F8FBFF;
 }
 
 .viewer-header strong,
@@ -3106,7 +3106,7 @@ h1 {
 
 .viewer-actions .viewer-close {
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   font-weight: 900;
   border-color: rgba(249, 213, 111, 0.6);
 }
@@ -3131,7 +3131,7 @@ h1 {
 .viewer-actions button.active,
 .viewer-footer button.active {
   background: #2F73F2;
-  color: #172033;
+  color: #101A3D;
   border-color: #2F73F2;
 }
 
@@ -3260,7 +3260,7 @@ h1 {
     height: 42px;
     border-radius: 50%;
     background: #2F73F2;
-    color: #172033;
+    color: #101A3D;
     border: 0;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
     align-items: center;
